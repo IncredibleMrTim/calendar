@@ -47,9 +47,10 @@ interface CalendarEvent extends EventDTO {
 export const Calendar = () => {
   const [selectedEvent, setSelectedEvent] = useState<EventDTO | null>(null);
   const [isCreating, setIsCreating] = useState<boolean>(false);
-
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const [calendarView, setCalendarView] = useState<View>("week");
   const [events, setEvents] = useState<EventDTO[] | null>(null);
+
   useEffect(() => {
     (async () => {
       const e = await getEvents();
@@ -118,7 +119,8 @@ export const Calendar = () => {
         const startDateTime = new Date(data.startDate);
         const [hours, minutes] = data.startTime.split(":").map(Number);
         startDateTime.setHours(hours, minutes, 0, 0);
-        return startDateTime > new Date();
+        const now = new Date();
+        return startDateTime >= new Date(now.getTime() - 300000); // Allow 5 minute buffer
       },
       {
         message: "Start date and time cannot be in the past.",
@@ -157,6 +159,7 @@ export const Calendar = () => {
   const handleEventClose = () => {
     setSelectedEvent(null);
     setIsCreating(false);
+    setIsDeleting(false);
   };
 
   const handleFromSubmit = async (data: z.infer<typeof formSchema>) => {
@@ -283,7 +286,9 @@ export const Calendar = () => {
         onOpenChange={handleEventClose}
       >
         <DialogContent>
-          <DialogTitle>Creating New Event</DialogTitle>
+          <DialogTitle>
+            {isCreating ? "Create Event" : "Edit Event"}
+          </DialogTitle>
           <form
             id="create-event-form"
             onSubmit={form.handleSubmit(handleFromSubmit)}
@@ -418,19 +423,38 @@ export const Calendar = () => {
             <div className="flex justify-between flex-row-reverse">
               <div className="flex gap-2 justify-end">
                 {selectedEvent && (
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    onClick={handleDelete}
-                  >
-                    Delete
-                  </Button>
+                  <>
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      onClick={() =>
+                        !isDeleting ? setIsDeleting(true) : handleDelete()
+                      }
+                    >
+                      {!isDeleting ? "Delete Event" : "Confirm Delete!"}
+                    </Button>
+                    {isDeleting && (
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        onClick={() => setIsDeleting(false)}
+                      >
+                        Cancel
+                      </Button>
+                    )}
+                  </>
                 )}
-                <Button type="submit">Submit</Button>
+                {!isDeleting && <Button type="submit">Submit</Button>}
               </div>
               <Button onClick={handleEventClose}>Close</Button>
             </div>
           </form>
+          {isDeleting && (
+            <div className="text-red-500">
+              You are about to delete this event. Please confirm deletion or
+              cancel.
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </>
