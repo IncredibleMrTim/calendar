@@ -1,6 +1,5 @@
 "use client";
-import { useState, useCallback, useMemo, useEffect } from "react";
-import { Event as EventDto } from "@prisma/client";
+import { useState, useMemo, useEffect } from "react";
 import {
   dateFnsLocalizer,
   Calendar as RBCCalendar,
@@ -13,7 +12,6 @@ import { enGB } from "date-fns/locale";
 import { Dialog, DialogContent, DialogTitle } from "../ui/dialog";
 import {
   Field,
-  FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
@@ -33,6 +31,7 @@ import {
   EventDTO,
   getEvents,
   updateEvent,
+  deleteEvent,
 } from "@/actions/events.action";
 
 const BigCalendar = dynamic(() => Promise.resolve(RBCCalendar), {
@@ -167,13 +166,13 @@ export const Calendar = () => {
     let newEvent: EventDTO;
 
     if (selectedEvent) {
-      const eventData: EventDTO = {
+      const eventData = {
         id: selectedEvent.id,
         title: data.title,
         description: data.description,
         startDate,
         endDate,
-      };
+      } as EventDTO;
       newEvent = await updateEvent(eventData);
       setEvents((prevEvents) =>
         (prevEvents || []).map((event) =>
@@ -181,18 +180,27 @@ export const Calendar = () => {
         ),
       );
     } else {
-      const eventData: Omit<EventDTO, "id"> = {
+      const eventData = {
         title: data.title,
         description: data.description,
         startDate,
         endDate,
       };
-      newEvent = await createEvent(eventData);
+      newEvent = await createEvent(eventData as EventDTO);
       setEvents((prevEvents) => [...(prevEvents || []), newEvent]);
     }
 
     setSelectedEvent(null);
     setIsCreating(false);
+  };
+
+  const handleDelete = async () => {
+    if (!selectedEvent) return;
+    await deleteEvent(selectedEvent);
+    setEvents((prevEvents) =>
+      (prevEvents || []).filter((event) => event.id !== selectedEvent.id),
+    );
+    setSelectedEvent(null);
   };
 
   const CustomToolbar = (toolbar: RBCToolbarProps<CalendarEvent>) => {
@@ -278,6 +286,7 @@ export const Calendar = () => {
           <form
             id="create-event-form"
             onSubmit={form.handleSubmit(handleFromSubmit)}
+            className="flex flex-col gap-4"
           >
             <FieldGroup>
               <Controller
@@ -405,7 +414,18 @@ export const Calendar = () => {
                 )}
               />
             </FieldGroup>
-            <Button type="submit">Submit</Button>
+            <div className="flex gap-2 justify-end">
+              {selectedEvent && (
+                <Button
+                  type="button"
+                  variant="destructive"
+                  onClick={handleDelete}
+                >
+                  Delete
+                </Button>
+              )}
+              <Button type="submit">Submit</Button>
+            </div>
           </form>
         </DialogContent>
       </Dialog>
