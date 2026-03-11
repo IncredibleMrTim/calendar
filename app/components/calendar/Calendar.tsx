@@ -154,6 +154,11 @@ export const Calendar = () => {
     }
   }, [selectedEvent, form]);
 
+  const handleEventClose = () => {
+    setSelectedEvent(null);
+    setIsCreating(false);
+  };
+
   const handleFromSubmit = async (data: z.infer<typeof formSchema>) => {
     const [startHours, startMinutes] = data.startTime.split(":").map(Number);
     const startDate = new Date(data.startDate);
@@ -190,8 +195,7 @@ export const Calendar = () => {
       setEvents((prevEvents) => [...(prevEvents || []), newEvent]);
     }
 
-    setSelectedEvent(null);
-    setIsCreating(false);
+    handleEventClose();
   };
 
   const handleDelete = async () => {
@@ -200,7 +204,7 @@ export const Calendar = () => {
     setEvents((prevEvents) =>
       (prevEvents || []).filter((event) => event.id !== selectedEvent.id),
     );
-    setSelectedEvent(null);
+    handleEventClose();
   };
 
   const CustomToolbar = (toolbar: RBCToolbarProps<CalendarEvent>) => {
@@ -276,10 +280,7 @@ export const Calendar = () => {
 
       <Dialog
         open={!!isCreating || !!selectedEvent}
-        onOpenChange={() => {
-          setIsCreating(false);
-          setSelectedEvent(null);
-        }}
+        onOpenChange={handleEventClose}
       >
         <DialogContent>
           <DialogTitle>Creating New Event</DialogTitle>
@@ -414,17 +415,20 @@ export const Calendar = () => {
                 )}
               />
             </FieldGroup>
-            <div className="flex gap-2 justify-end">
-              {selectedEvent && (
-                <Button
-                  type="button"
-                  variant="destructive"
-                  onClick={handleDelete}
-                >
-                  Delete
-                </Button>
-              )}
-              <Button type="submit">Submit</Button>
+            <div className="flex justify-between flex-row-reverse">
+              <div className="flex gap-2 justify-end">
+                {selectedEvent && (
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    onClick={handleDelete}
+                  >
+                    Delete
+                  </Button>
+                )}
+                <Button type="submit">Submit</Button>
+              </div>
+              <Button onClick={handleEventClose}>Close</Button>
             </div>
           </form>
         </DialogContent>
