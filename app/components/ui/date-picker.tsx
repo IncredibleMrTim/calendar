@@ -17,6 +17,7 @@ interface DatePickerProps {
   placeholder?: string;
   id?: string;
   "data-invalid"?: boolean;
+  disabled?: boolean;
 }
 
 export function DatePicker({
@@ -25,10 +26,11 @@ export function DatePicker({
   placeholder = "Pick a date",
   id,
   "data-invalid": invalid,
+  disabled = false,
 }: DatePickerProps) {
   return (
     <Popover>
-      <PopoverTrigger asChild>
+      <PopoverTrigger asChild disabled={disabled}>
         <Button
           id={id}
           variant="outline"
@@ -38,6 +40,7 @@ export function DatePicker({
             invalid && "border-destructive",
           )}
           data-invalid={invalid}
+          disabled={disabled}
         >
           <CalendarIcon className="mr-2 size-4" />
           {value ? format(value, "PPP") : placeholder}

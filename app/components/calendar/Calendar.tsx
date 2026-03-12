@@ -7,32 +7,13 @@ import {
   View,
 } from "react-big-calendar";
 import "react-big-calendar/lib/css/react-big-calendar.css";
-import { format, parse, startOfWeek, getDay, addMinutes } from "date-fns";
+import { format, parse, startOfWeek, getDay } from "date-fns";
 import { enGB } from "date-fns/locale";
-import { Dialog, DialogContent, DialogTitle } from "../ui/dialog";
-import {
-  Field,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from "@/components/ui/field";
 import { Button } from "../ui/button";
-import { DatePicker } from "../ui/date-picker";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Controller, useForm } from "react-hook-form";
-import * as z from "zod";
-
-import { Input } from "../ui/input";
-
 import dynamic from "next/dynamic";
-import { Textarea } from "../ui/textarea";
-import {
-  createEvent,
-  EventDTO,
-  getEvents,
-  updateEvent,
-  deleteEvent,
-} from "@/actions/events.action";
+import { EventDTO } from "@/actions/events.action";
+import { CalendarModal } from "./CalendarModal";
+import { useEventStore } from "./useEventStore";
 
 const BigCalendar = dynamic(() => Promise.resolve(RBCCalendar), {
   ssr: false,
@@ -45,18 +26,17 @@ interface CalendarEvent extends EventDTO {
 }
 
 export const Calendar = () => {
-  const [selectedEvent, setSelectedEvent] = useState<EventDTO | null>(null);
-  const [isCreating, setIsCreating] = useState<boolean>(false);
-  const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const [calendarView, setCalendarView] = useState<View>("week");
-  const [events, setEvents] = useState<EventDTO[] | null>(null);
+
+  // Subscribe to only what this component needs
+  const events = useEventStore((state) => state.events);
+  const fetchEvents = useEventStore((state) => state.fetchEvents);
+  const onCreateEvent = useEventStore((state) => state.onCreateEvent);
+  const onSelectEvent = useEventStore((state) => state.onSelectEvent);
 
   useEffect(() => {
-    (async () => {
-      const e = await getEvents();
-      setEvents(e);
-    })();
-  }, []);
+    fetchEvents();
+  }, [fetchEvents]);
 
   const localizer = useMemo(
     () =>
@@ -70,144 +50,8 @@ export const Calendar = () => {
     [],
   );
 
-  const onCreateEvent = () => {
-    const now = new Date();
-    const currentTime = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
-    const endDate = addMinutes(now, 30);
-    const endTimeString = `${String(endDate.getHours()).padStart(2, "0")}:${String(endDate.getMinutes()).padStart(2, "0")}`;
-
-    form.reset({
-      title: "",
-      description: "",
-      startDate: now,
-      startTime: currentTime,
-      endDate,
-      endTime: endTimeString,
-    });
-    setIsCreating(true);
-  };
-
   const onViewChange = (view: View) => {
     setCalendarView(view);
-  };
-
-  const now = new Date();
-  const currentTime = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
-  const endDateDefault = addMinutes(now, 30);
-  const endTimeString = `${String(endDateDefault.getHours()).padStart(2, "0")}:${String(endDateDefault.getMinutes()).padStart(2, "0")}`;
-
-  const formSchema = z
-    .object({
-      title: z
-        .string()
-        .min(5, "Title must be at least 5 characters.")
-        .max(32, "Title can only be 32 characters long."),
-      description: z
-        .string()
-        .max(500, "Description can only be 500 characters long."),
-      startDate: z
-        .date()
-        .refine(() => true, "Start Date cannot be in the past."),
-      startTime: z
-        .string()
-        .regex(/^\d{2}:\d{2}$/, "Invalid time format (HH:mm)"),
-      endDate: z.date(),
-      endTime: z.string().regex(/^\d{2}:\d{2}$/, "Invalid time format (HH:mm)"),
-    })
-    .refine(
-      (data) => {
-        const startDateTime = new Date(data.startDate);
-        const [hours, minutes] = data.startTime.split(":").map(Number);
-        startDateTime.setHours(hours, minutes, 0, 0);
-        const now = new Date();
-        return startDateTime >= new Date(now.getTime() - 300000); // Allow 5 minute buffer
-      },
-      {
-        message: "Start date and time cannot be in the past.",
-        path: ["startDate"],
-      },
-    );
-
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    mode: "onChange",
-    defaultValues: {
-      title: "",
-      description: "",
-      startDate: now,
-      startTime: currentTime,
-      endDate: endDateDefault,
-      endTime: endTimeString,
-    },
-  });
-
-  useEffect(() => {
-    if (selectedEvent) {
-      const startTimeString = `${String(selectedEvent.startDate.getHours()).padStart(2, "0")}:${String(selectedEvent.startDate.getMinutes()).padStart(2, "0")}`;
-      const endTimeString = `${String(selectedEvent.endDate.getHours()).padStart(2, "0")}:${String(selectedEvent.endDate.getMinutes()).padStart(2, "0")}`;
-      form.reset({
-        title: selectedEvent.title,
-        description: selectedEvent.description,
-        startDate: selectedEvent.startDate,
-        startTime: startTimeString,
-        endDate: selectedEvent.endDate,
-        endTime: endTimeString,
-      });
-    }
-  }, [selectedEvent, form]);
-
-  const handleEventClose = () => {
-    setSelectedEvent(null);
-    setIsCreating(false);
-    setIsDeleting(false);
-  };
-
-  const handleFromSubmit = async (data: z.infer<typeof formSchema>) => {
-    const [startHours, startMinutes] = data.startTime.split(":").map(Number);
-    const startDate = new Date(data.startDate);
-    startDate.setHours(startHours, startMinutes, 0, 0);
-
-    const [endHours, endMinutes] = data.endTime.split(":").map(Number);
-    const endDate = new Date(data.endDate);
-    endDate.setHours(endHours, endMinutes, 0, 0);
-
-    let newEvent: EventDTO;
-
-    if (selectedEvent) {
-      const eventData = {
-        id: selectedEvent.id,
-        title: data.title,
-        description: data.description,
-        startDate,
-        endDate,
-      } as EventDTO;
-      newEvent = await updateEvent(eventData);
-      setEvents((prevEvents) =>
-        (prevEvents || []).map((event) =>
-          event.id === selectedEvent.id ? newEvent : event,
-        ),
-      );
-    } else {
-      const eventData = {
-        title: data.title,
-        description: data.description,
-        startDate,
-        endDate,
-      };
-      newEvent = await createEvent(eventData as EventDTO);
-      setEvents((prevEvents) => [...(prevEvents || []), newEvent]);
-    }
-
-    handleEventClose();
-  };
-
-  const handleDelete = async () => {
-    if (!selectedEvent) return;
-    await deleteEvent(selectedEvent);
-    setEvents((prevEvents) =>
-      (prevEvents || []).filter((event) => event.id !== selectedEvent.id),
-    );
-    handleEventClose();
   };
 
   const CustomToolbar = (toolbar: RBCToolbarProps<CalendarEvent>) => {
@@ -277,186 +121,11 @@ export const Calendar = () => {
         onView={onViewChange}
         defaultDate={new Date()}
         style={{ height: "calc(100vh - 100px)" }}
-        onSelectEvent={(event: CalendarEvent) => setSelectedEvent(event)}
+        onSelectEvent={(event: CalendarEvent) => onSelectEvent(event)}
         components={{ toolbar: CustomToolbar }}
       />
 
-      <Dialog
-        open={!!isCreating || !!selectedEvent}
-        onOpenChange={handleEventClose}
-      >
-        <DialogContent>
-          <DialogTitle>
-            {isCreating ? "Create Event" : "Edit Event"}
-          </DialogTitle>
-          <form
-            id="create-event-form"
-            onSubmit={form.handleSubmit(handleFromSubmit)}
-            className="flex flex-col gap-4"
-          >
-            <FieldGroup>
-              <Controller
-                name="title"
-                control={form.control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid} className="relative">
-                    <FieldLabel>Title</FieldLabel>
-                    <Input {...field} />
-                    {fieldState.invalid && (
-                      <FieldError
-                        errors={[fieldState.error]}
-                        className="absolute -bottom-7 right-0 w-auto!"
-                      />
-                    )}
-                  </Field>
-                )}
-              />
-              <div className="grid grid-cols-2 gap-4">
-                <Controller
-                  name="startDate"
-                  control={form.control}
-                  render={({ field, fieldState }) => (
-                    <Field
-                      data-invalid={fieldState.invalid}
-                      className="relative"
-                    >
-                      <FieldLabel>Start Date</FieldLabel>
-                      <DatePicker
-                        {...field}
-                        onSelect={field.onChange}
-                        data-invalid={fieldState.invalid}
-                      />
-                      {fieldState.invalid && (
-                        <FieldError
-                          errors={[fieldState.error]}
-                          className="absolute -bottom-7 right-0 w-auto!"
-                        />
-                      )}
-                    </Field>
-                  )}
-                />
-                <Controller
-                  name="startTime"
-                  control={form.control}
-                  render={({ field, fieldState }) => (
-                    <Field
-                      data-invalid={fieldState.invalid}
-                      className="relative"
-                    >
-                      <FieldLabel>Start Time</FieldLabel>
-                      <Input type="time" {...field} />
-                      {fieldState.invalid && (
-                        <FieldError
-                          errors={[fieldState.error]}
-                          className="absolute -bottom-7 right-0 w-auto!"
-                        />
-                      )}
-                    </Field>
-                  )}
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <Controller
-                  name="endDate"
-                  control={form.control}
-                  render={({ field, fieldState }) => (
-                    <Field
-                      data-invalid={fieldState.invalid}
-                      className="relative"
-                    >
-                      <FieldLabel>End Date</FieldLabel>
-                      <DatePicker
-                        value={field.value}
-                        onSelect={field.onChange}
-                        data-invalid={fieldState.invalid}
-                      />
-                      {fieldState.invalid && (
-                        <FieldError
-                          errors={[fieldState.error]}
-                          className="absolute -bottom-7 right-0 w-auto!"
-                        />
-                      )}
-                    </Field>
-                  )}
-                />
-                <Controller
-                  name="endTime"
-                  control={form.control}
-                  render={({ field, fieldState }) => (
-                    <Field
-                      data-invalid={fieldState.invalid}
-                      className="relative"
-                    >
-                      <FieldLabel>End Time</FieldLabel>
-                      <Input type="time" {...field} />
-                      {fieldState.invalid && (
-                        <FieldError
-                          errors={[fieldState.error]}
-                          className="absolute -bottom-7 right-0 w-auto!"
-                        />
-                      )}
-                    </Field>
-                  )}
-                />
-              </div>
-              <Controller
-                name="description"
-                control={form.control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid} className="relative">
-                    <FieldLabel>Description</FieldLabel>
-                    <Textarea
-                      {...field}
-                      data-invalid={fieldState.invalid}
-                      maxLength={500}
-                    />
-                    {fieldState.invalid && (
-                      <FieldError
-                        errors={[fieldState.error]}
-                        className="absolute -bottom-7 right-0 w-auto!"
-                      />
-                    )}
-                  </Field>
-                )}
-              />
-            </FieldGroup>
-            <div className="flex justify-between flex-row-reverse">
-              <div className="flex gap-2 justify-end">
-                {selectedEvent && (
-                  <>
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      onClick={() =>
-                        !isDeleting ? setIsDeleting(true) : handleDelete()
-                      }
-                    >
-                      {!isDeleting ? "Delete Event" : "Confirm Delete!"}
-                    </Button>
-                    {isDeleting && (
-                      <Button
-                        type="button"
-                        variant="secondary"
-                        onClick={() => setIsDeleting(false)}
-                      >
-                        Cancel
-                      </Button>
-                    )}
-                  </>
-                )}
-                {!isDeleting && <Button type="submit">Submit</Button>}
-              </div>
-              <Button onClick={handleEventClose}>Close</Button>
-            </div>
-          </form>
-          {isDeleting && (
-            <div className="text-red-500">
-              You are about to delete this event. Please confirm deletion or
-              cancel.
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      <CalendarModal />
     </>
   );
 };
