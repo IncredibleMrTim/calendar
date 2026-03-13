@@ -5,6 +5,7 @@ import {
   Calendar as RBCCalendar,
   ToolbarProps as RBCToolbarProps,
   View,
+  SlotInfo,
 } from "react-big-calendar";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { format, parse, startOfWeek, getDay } from "date-fns";
@@ -14,6 +15,7 @@ import dynamic from "next/dynamic";
 import { EventDTO } from "@/actions/events.action";
 import { CalendarModal } from "./CalendarModal";
 import { useEventStore } from "./useEventStore";
+import { useDoubleClick } from "@/hooks/useDoubleClick";
 
 const BigCalendar = dynamic(() => Promise.resolve(RBCCalendar), {
   ssr: false,
@@ -27,7 +29,7 @@ interface CalendarEvent extends EventDTO {
 
 export const Calendar = () => {
   const [calendarView, setCalendarView] = useState<View>("week");
-
+  const [slotInfo, setSlotInfo] = useState<SlotInfo | undefined>(undefined);
   // Subscribe to only what this component needs
   const events = useEventStore((state) => state.events);
   const fetchEvents = useEventStore((state) => state.fetchEvents);
@@ -53,6 +55,15 @@ export const Calendar = () => {
   const onViewChange = (view: View) => {
     setCalendarView(view);
   };
+
+  const handleDoubleClickSlot = useDoubleClick<SlotInfo>({
+    onDoubleClick: (slotData) => {
+      setSlotInfo(slotData);
+      onCreateEvent();
+    },
+    threshold: 300, // optional, defaults to 300ms
+    isEqual: (a, b) => a.start.getTime() === b.start.getTime(), // compare slots by start time
+  });
 
   const CustomToolbar = (toolbar: RBCToolbarProps<CalendarEvent>) => {
     return (
@@ -123,9 +134,11 @@ export const Calendar = () => {
         style={{ height: "calc(100vh - 100px)" }}
         onSelectEvent={(event: CalendarEvent) => onSelectEvent(event)}
         components={{ toolbar: CustomToolbar }}
+        selectable
+        onSelectSlot={handleDoubleClickSlot}
       />
 
-      <CalendarModal />
+      <CalendarModal slotInfo={slotInfo} />
     </>
   );
 };
