@@ -15,7 +15,7 @@ import * as z from "zod";
 import { Input } from "../ui/input";
 
 import { addMinutes, format } from "date-fns";
-import { useEventStore } from "./useEventStore";
+import { useEventStore } from "../../stores/useEventStore";
 import { Rte } from "../rte/Rte";
 import { SlotInfo } from "react-big-calendar";
 

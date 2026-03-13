@@ -1,4 +1,4 @@
-import * as React from "react";
+import { useState } from "react";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
 
@@ -10,6 +10,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { LuChevronDown, LuChevronUp } from "react-icons/lu";
 
 interface DatePickerProps {
   value?: Date;
@@ -28,12 +29,14 @@ export function DatePicker({
   "data-invalid": invalid,
   disabled = false,
 }: DatePickerProps) {
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+
   return (
-    <Popover>
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild disabled={disabled}>
         <Button
           id={id}
-          variant="outline"
+          variant="ghost"
           className={cn(
             "w-full justify-start text-left font-normal",
             !value && "text-muted-foreground",
@@ -44,6 +47,7 @@ export function DatePicker({
         >
           <CalendarIcon className="mr-2 size-4" />
           {value ? format(value, "PPP") : placeholder}
+          {isOpen ? <LuChevronUp /> : <LuChevronDown />}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">
