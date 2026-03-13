@@ -1,4 +1,10 @@
-import { format } from "date-fns";
+import {
+  format,
+  startOfMonth,
+  differenceInCalendarWeeks,
+  startOfWeek,
+  endOfWeek,
+} from "date-fns";
 import { Button } from "../ui/button";
 import { DatePicker } from "../ui/date-picker";
 
@@ -38,8 +44,21 @@ export const CalendarToolbar = ({
 }: CalendarToolbarProps) => {
   const currentView = useCalendarStore((state) => state.currentView);
 
+  const getViewDateFormat = () => {
+    switch (currentView) {
+      case CalendarView.DAY:
+        return format(currentDate, "EEE MMMM do yyyy");
+      case CalendarView.WEEK:
+        return `${format(startOfWeek(currentDate), "do")} - ${format(endOfWeek(currentDate), "do")} ${format(currentDate, "MMMM")} ${format(currentDate, "yyyy")}`;
+      case CalendarView.MONTH:
+        return format(currentDate, "MMMM yyyy");
+      default:
+        return "Agenda";
+    }
+  };
+
   return (
-    <div className="flex justify-between items-center p-2 bg-gray-50 border-b">
+    <div className="flex flex-col-reverse md:flex-row justify-between items-center p-2 bg-gray-50 border-b">
       <div className="flex gap-2 justify-start">
         <div className="w-max-150">
           <DatePicker
@@ -68,10 +87,8 @@ export const CalendarToolbar = ({
           </Select>
         </>
       </div>
-      <div className="flex gap-2 flex-nowrap">
-        <h2 className="text-lg font-semibold">
-          {format(currentDate, "EEE, MMMM d, yyyy")}
-        </h2>
+      <div className="flex gap-4 flex-nowrap items-center">
+        <h2 className="text-lg font-semibold">{getViewDateFormat()}</h2>
         <Button
           className="px-3 py-1 bg-green-500 text-white"
           onClick={() => onCreateEvent()}
