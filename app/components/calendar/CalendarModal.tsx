@@ -17,6 +17,7 @@ import { Input } from "../ui/input";
 import { addMinutes, format } from "date-fns";
 import { useEventStore } from "./useEventStore";
 import { Rte } from "../rte/Rte";
+import { SlotInfo } from "react-big-calendar";
 
 const formatTimeString = (date: Date) => format(date, "HH:mm");
 
@@ -63,7 +64,11 @@ const formSchema = z
 export type FormSchema = z.infer<typeof formSchema>;
 export { formSchema };
 
-export const CalendarModal = () => {
+interface CalendarModalProps {
+  slotInfo?: SlotInfo;
+}
+
+export const CalendarModal = ({ slotInfo }: CalendarModalProps) => {
   // Subscribe to only what this component needs
   const selectedEvent = useEventStore((state) => state.selectedEvent);
   const isCreating = useEventStore((state) => state.isCreating);
@@ -73,7 +78,9 @@ export const CalendarModal = () => {
   const handleFormSubmit = useEventStore((state) => state.handleFormSubmit);
   const handleDelete = useEventStore((state) => state.handleDelete);
 
-  const isEventInPast = selectedEvent ? selectedEvent.endDate < new Date() : false;
+  const isEventInPast = selectedEvent
+    ? selectedEvent.endDate < new Date()
+    : false;
   const isOpen = Boolean(isCreating || selectedEvent);
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
@@ -81,10 +88,18 @@ export const CalendarModal = () => {
     defaultValues: {
       title: "",
       description: "",
-      startDate: now,
-      startTime: currentTime,
-      endDate: endDateDefault,
-      endTime: endTimeString,
+      startDate:
+        slotInfo?.start && slotInfo.start >= now ? slotInfo.start : now,
+      startTime:
+        slotInfo?.start && slotInfo.start >= now
+          ? formatTimeString(slotInfo.start)
+          : currentTime,
+      endDate:
+        slotInfo?.end && slotInfo.end >= now ? slotInfo.end : endDateDefault,
+      endTime:
+        slotInfo?.end && slotInfo.end >= now
+          ? formatTimeString(slotInfo.end)
+          : endTimeString,
     },
   });
 
@@ -101,15 +116,25 @@ export const CalendarModal = () => {
       : {
           title: "",
           description: "",
-          startDate: now,
-          startTime: currentTime,
-          endDate: endDateDefault,
-          endTime: endTimeString,
+          startDate:
+            slotInfo?.start && slotInfo.start >= now ? slotInfo.start : now,
+          startTime:
+            slotInfo?.start && slotInfo.start >= now
+              ? formatTimeString(slotInfo.start)
+              : currentTime,
+          endDate:
+            slotInfo?.end && slotInfo.end >= now
+              ? slotInfo.end
+              : endDateDefault,
+          endTime:
+            slotInfo?.end && slotInfo.end >= now
+              ? formatTimeString(slotInfo.end)
+              : endTimeString,
         };
 
     form.reset(resetData);
     if (selectedEvent) form.clearErrors();
-  }, [selectedEvent, isCreating, form]);
+  }, [selectedEvent, isCreating, slotInfo, form]);
 
   return (
     <Dialog open={isOpen} onOpenChange={handleEventClose}>

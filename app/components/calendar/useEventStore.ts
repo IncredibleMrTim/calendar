@@ -9,6 +9,7 @@ import {
 } from "@/actions/events.action";
 import * as z from "zod";
 import { formSchema } from "./CalendarModal";
+import { SlotInfo } from "react-big-calendar";
 
 interface EventStore {
   events: EventDTO[] | null;
