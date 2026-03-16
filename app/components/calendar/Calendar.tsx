@@ -141,7 +141,7 @@ export const Calendar = () => {
       {session?.user.role === UserRole.ADMIN ? (
         <CalendarModal slotInfo={slotInfo} />
       ) : (
-        <CalendarDisplayModal slotInfo={slotInfo} />
+        <CalendarDisplayModal />
       )}
     </>
   );

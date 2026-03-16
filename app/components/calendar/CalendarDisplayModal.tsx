@@ -3,8 +3,6 @@ import { Dialog, DialogContent, DialogTitle } from "../ui/dialog";
 import { useEventStore } from "@/stores/useEventStore";
 import { lexicalToHtml } from "@/utils/lexical";
 import format from "date-fns/format";
-import { Label } from "../ui/label";
-import { Card, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
 
 export const CalendarDisplayModal = () => {
