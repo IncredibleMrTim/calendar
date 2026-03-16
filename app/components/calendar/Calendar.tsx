@@ -17,6 +17,9 @@ import { useEventStore } from "../../stores/useEventStore";
 import { useCalendarStore, CalendarView } from "@/stores/useCalendarStore";
 import { useDoubleClick } from "@/hooks/useDoubleClick";
 import { CalendarToolbar } from "./CalendarToolbar";
+import { CalendarDisplayModal } from "./CalendarDisplayModal";
+import { useSession } from "next-auth/react";
+import { UserRole } from "@prisma/client";
 
 const BigCalendar = dynamic(() => Promise.resolve(RBCCalendar), {
   ssr: false,
@@ -31,6 +34,8 @@ interface CalendarEvent extends EventDTO {
 export const Calendar = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [slotInfo, setSlotInfo] = useState<SlotInfo | undefined>(undefined);
+  const { data: session } = useSession();
+
   // Subscribe to only what this component needs
   const currentView = useCalendarStore((state) => state.currentView);
   const setCurrentView = useCalendarStore((state) => state.setCurrentView);
@@ -133,7 +138,11 @@ export const Calendar = () => {
         />
       </div>
 
-      <CalendarModal slotInfo={slotInfo} />
+      {session?.user.role === UserRole.ADMIN ? (
+        <CalendarModal slotInfo={slotInfo} />
+      ) : (
+        <CalendarDisplayModal />
+      )}
     </>
   );
 };
