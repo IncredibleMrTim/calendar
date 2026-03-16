@@ -8,8 +8,7 @@ import {
   deleteEvent,
 } from "@/actions/events.action";
 import * as z from "zod";
-import { formSchema } from "./CalendarModal";
-import { SlotInfo } from "react-big-calendar";
+import { formSchema } from "../components/calendar/CalendarModal";
 
 interface EventStore {
   events: EventDTO[] | null;
