@@ -1,13 +1,7 @@
-import {
-  format,
-  startOfMonth,
-  differenceInCalendarWeeks,
-  startOfWeek,
-  endOfWeek,
-} from "date-fns";
+import { format, startOfWeek, endOfWeek } from "date-fns";
 import { Button } from "../ui/button";
 import { DatePicker } from "../ui/date-picker";
-
+import { AuthUserMenu } from "../auth/authUserMenu/AuthUserMenu";
 import {
   Select,
   SelectContent,
@@ -95,6 +89,7 @@ export const CalendarToolbar = ({
         >
           + Add Event
         </Button>
+        <AuthUserMenu />
       </div>
     </div>
   );
