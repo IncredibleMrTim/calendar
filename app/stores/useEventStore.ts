@@ -74,6 +74,13 @@ export const useEventStore = create<EventStore>()(
 
         let newEvent: EventDTO;
 
+        const contactFields = {
+          contactFirstName: data.contactFirstName || null,
+          contactLastName: data.contactLastName || null,
+          contactPhone: data.contactPhone || null,
+          contactEmail: data.contactEmail || null,
+        };
+
         if (selectedEvent) {
           const eventData = {
             id: selectedEvent.id,
@@ -81,6 +88,7 @@ export const useEventStore = create<EventStore>()(
             description: data.description,
             startDate,
             endDate,
+            ...contactFields,
           } as EventDTO;
           newEvent = await updateEvent(eventData);
           set(
@@ -98,6 +106,7 @@ export const useEventStore = create<EventStore>()(
             description: data.description,
             startDate,
             endDate,
+            ...contactFields,
           };
           newEvent = await createEvent(eventData as EventDTO);
           set({ events: [...(events || []), newEvent] }, false, "createEvent");
