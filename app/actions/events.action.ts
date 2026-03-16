@@ -4,33 +4,34 @@ import { Event } from "@prisma/client";
 
 export type EventDTO = Pick<
   Event,
-  "title" | "description" | "startDate" | "endDate" | "updatedAt" | "id"
+  | "id"
+  | "title"
+  | "description"
+  | "startDate"
+  | "endDate"
+  | "updatedAt"
+  | "contactFirstName"
+  | "contactLastName"
+  | "contactPhone"
+  | "contactEmail"
 >;
 
 export const createEvent = async (eventData: EventDTO): Promise<EventDTO> => {
-  const event = await prisma.event.create({ data: eventData });
-  return event;
+  return await prisma.event.create({ data: eventData });
 };
 
 export const getEvents = async (): Promise<EventDTO[]> => {
-  return await prisma.event.findMany({
-    where: { deletedAt: null },
-  });
+  return await prisma.event.findMany({ where: { deletedAt: null } });
 };
 
 export const updateEvent = async (eventData: EventDTO): Promise<EventDTO> => {
   const { id, ...data } = eventData;
-  const event = await prisma.event.update({
-    where: { id },
-    data,
-  });
-  return event;
+  return await prisma.event.update({ where: { id }, data });
 };
 
 export const deleteEvent = async (eventData: EventDTO): Promise<EventDTO> => {
-  const event = await prisma.event.update({
+  return await prisma.event.update({
     where: { id: eventData.id },
     data: { deletedAt: new Date() },
   });
-  return event;
 };
