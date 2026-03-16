@@ -11,6 +11,8 @@ import {
 } from "../ui/select";
 import { CalendarView } from "@/stores/useCalendarStore";
 import { useCalendarStore } from "@/stores/useCalendarStore";
+import { useSession } from "next-auth/react";
+import { UserRole } from "@prisma/client";
 
 interface CalendarToolbarProps {
   currentDate: Date;
@@ -37,7 +39,7 @@ export const CalendarToolbar = ({
   onCreateEvent,
 }: CalendarToolbarProps) => {
   const currentView = useCalendarStore((state) => state.currentView);
-
+  const { data: session } = useSession();
   const getViewDateFormat = () => {
     switch (currentView) {
       case CalendarView.DAY:
@@ -83,12 +85,14 @@ export const CalendarToolbar = ({
       </div>
       <div className="flex gap-4 flex-nowrap items-center">
         <h2 className="text-lg font-semibold">{getViewDateFormat()}</h2>
-        <Button
-          className="px-3 py-1 bg-green-500 text-white"
-          onClick={() => onCreateEvent()}
-        >
-          + Add Event
-        </Button>
+        {session?.user.role === UserRole.ADMIN && (
+          <Button
+            className="px-3 py-1 bg-green-500 text-white"
+            onClick={() => onCreateEvent()}
+          >
+            + Add Event
+          </Button>
+        )}
         <AuthUserMenu />
       </div>
     </div>
