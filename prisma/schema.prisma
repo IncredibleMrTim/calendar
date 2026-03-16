@@ -12,6 +12,14 @@ datasource db {
   provider = "postgresql"
 }
 
+model User {
+  id        String @id @default(uuid())
+  email     String @unique
+  firstName String
+  surname   String
+  role      UserRole @default(USER)
+}
+
 model Event {
   id                  String    @id @default(uuid())
   title               String
@@ -25,4 +33,9 @@ model Event {
   contactLastName     String?
   contactPhone        String?
   contactEmail        String?
+}
+
+enum UserRole {
+  USER
+  ADMIN
 }
