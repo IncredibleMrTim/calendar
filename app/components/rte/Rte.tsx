@@ -172,7 +172,7 @@ function ToolbarPlugin() {
   ] as const;
 
   return (
-    <div className="flex border-b border-gray-300 pb-2 mb-2 flex-wrap">
+    <div className="flex border-b border-gray-300 pb-2 mb-2 flex-wrap gap-2 md:gap-0">
       <ToolbarButton
         onClick={() => editor.dispatchCommand(UNDO_COMMAND, undefined)}
         active={false}
@@ -188,7 +188,7 @@ function ToolbarPlugin() {
         <LuRedo2 fontSize="18" />
       </ToolbarButton>
 
-      <div className="w-px bg-gray-300 mx-1" />
+      <div className="w-px bg-gray-300 mx-1 hidden md:flex" />
 
       {formatButtons.map(({ format, label, title }) => (
         <ToolbarButton
@@ -201,7 +201,7 @@ function ToolbarPlugin() {
         </ToolbarButton>
       ))}
 
-      <div className="w-px bg-gray-300 mx-1" />
+      <div className="w-px bg-gray-300 mx-1 hidden md:flex" />
 
       <ToolbarButton
         onClick={() =>
@@ -222,7 +222,7 @@ function ToolbarPlugin() {
         <LuListOrdered fontSize="18" />
       </ToolbarButton>
 
-      <div className="w-px bg-gray-300 mx-1" />
+      <div className="w-px bg-gray-300 mx-1 hidden md:flex" />
 
       <ToolbarButton
         onClick={() => fileInputRef.current?.click()}
@@ -304,8 +304,8 @@ export const Rte = ({
           }
           placeholder={
             disabled ? null : (
-              <div className="absolute top-14 left-2 text-gray-400 pointer-events-none">
-                Enter text...
+              <div className="absolute top-22 md:top-14 left-2 text-gray-400 pointer-events-none">
+                Enter Event Description...
               </div>
             )
           }

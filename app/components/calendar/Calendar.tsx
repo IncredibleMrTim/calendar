@@ -16,10 +16,12 @@ import { CalendarModal } from "./CalendarModal";
 import { useEventStore } from "../../stores/useEventStore";
 import { useCalendarStore, CalendarView } from "@/stores/useCalendarStore";
 import { useDoubleClick } from "@/hooks/useDoubleClick";
+import { useIsMobile } from "@/hooks/useIsMobile";
 import { CalendarToolbar } from "./CalendarToolbar";
 import { CalendarDisplayModal } from "./CalendarDisplayModal";
 import { useSession } from "next-auth/react";
 import { UserRole } from "@prisma/client";
+import { AdBanner } from "../adBanner/AdBanner";
 
 const BigCalendar = dynamic(() => Promise.resolve(RBCCalendar), {
   ssr: false,
@@ -32,6 +34,7 @@ interface CalendarEvent extends EventDTO {
 }
 
 export const Calendar = () => {
+  const isMobile = useIsMobile();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [slotInfo, setSlotInfo] = useState<SlotInfo | undefined>(undefined);
   const { data: session } = useSession();
@@ -78,6 +81,15 @@ export const Calendar = () => {
     isEqual: (a, b) => a.start.getTime() === b.start.getTime(),
   });
 
+  const handleSelectSlot = (slotData: SlotInfo) => {
+    if (isMobile) {
+      setSlotInfo(slotData);
+      onCreateEvent();
+    } else {
+      handleDoubleClickSlot(slotData);
+    }
+  };
+
   const navigate = (
     action?: "PREV" | "NEXT" | "TODAY",
     selectedDate?: Date,
@@ -114,6 +126,7 @@ export const Calendar = () => {
         onViewChange={onViewChange}
         onCreateEvent={onCreateEvent}
       />
+      <AdBanner variant="inline" />
       <div className="w-full h-[calc(100vh-60px)] overflow-auto">
         <BigCalendar
           localizer={localizer}
@@ -134,7 +147,7 @@ export const Calendar = () => {
           onSelectEvent={(event: CalendarEvent) => onSelectEvent(event)}
           toolbar={false}
           selectable
-          onSelectSlot={handleDoubleClickSlot}
+          onSelectSlot={handleSelectSlot}
         />
       </div>
 

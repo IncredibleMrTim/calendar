@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
-
+import { useIsMobile } from "@/hooks/useIsMobile";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -30,7 +30,7 @@ export function DatePicker({
   disabled = false,
 }: DatePickerProps) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
-
+  const isMobile = useIsMobile();
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild disabled={disabled}>
@@ -46,7 +46,7 @@ export function DatePicker({
           disabled={disabled}
         >
           <CalendarIcon className="mr-2 size-4" />
-          {value ? format(value, "PPP") : placeholder}
+          {value ? format(value, isMobile ? "dd/MM/yy" : "PPP") : placeholder}
           {isOpen ? <LuChevronUp /> : <LuChevronDown />}
         </Button>
       </PopoverTrigger>

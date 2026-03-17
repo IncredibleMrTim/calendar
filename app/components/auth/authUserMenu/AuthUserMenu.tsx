@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { signOut, useSession } from "next-auth/react";
 import { LuLogOut } from "react-icons/lu";
 import {
@@ -12,7 +12,9 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 
-export const AuthUserMenu = () => {
+type AuthUserMenuProps = React.HTMLAttributes<HTMLDivElement>;
+
+export const AuthUserMenu = (props: AuthUserMenuProps) => {
   const { data: session } = useSession();
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [adminMenuOpen, setAdminMenuOpen] = useState(false);
@@ -30,13 +32,13 @@ export const AuthUserMenu = () => {
   };
 
   return (
-    <>
+    <div {...props}>
       {session?.user ? (
         <Popover onOpenChange={setAdminMenuOpen} open={adminMenuOpen}>
           <PopoverTrigger className="cursor-pointer">
             <Avatar>
               <AvatarImage src={session?.user.image || undefined} />
-              <AvatarFallback>
+              <AvatarFallback className="bg-red-100">
                 {session?.user.name
                   ?.split(" ")
                   .map((n: string) => n[0])
@@ -71,6 +73,6 @@ export const AuthUserMenu = () => {
       ) : (
         <Button onClick={() => router.push("/auth/signin")}>Login</Button>
       )}
-    </>
+    </div>
   );
 };
