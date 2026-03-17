@@ -11,20 +11,11 @@ export const CalendarDisplayModal = () => {
   if (!selectedEvent) return null;
   return (
     <Dialog open={!!selectedEvent} onOpenChange={handleEventClose}>
-      <DialogContent>
+      <DialogContent className="max-h-[90vh] md:max-h-2/3 overflow-y-auto">
         <DialogTitle>
           <h1 className="text-2xl">{selectedEvent?.title}</h1>
         </DialogTitle>
 
-        <h2 className="font-bold text-lg">Description</h2>
-        <div
-          className="bg-blue-50 p-4 rounded-md"
-          dangerouslySetInnerHTML={{
-            __html: lexicalToHtml(selectedEvent.description),
-          }}
-        />
-
-        <h2 className="font-bold text-lg">Event Details</h2>
         <div className="flex flex-col">
           <div className="bg-blue-50 p-4 rounded-md">
             <p>
@@ -37,6 +28,15 @@ export const CalendarDisplayModal = () => {
             </p>
           </div>
         </div>
+
+        <h2 className="font-bold text-lg">Description</h2>
+        <div
+          className="bg-blue-50 p-4 rounded-md [&_ul]:list-disc [&_ul]:ml-4 [&_ol]:list-decimal [&_ol]:ml-4"
+          dangerouslySetInnerHTML={{
+            __html: lexicalToHtml(selectedEvent.description),
+          }}
+        />
+
         <h2 className="font-bold text-lg">Contact Details</h2>
         <div>
           <div className="bg-blue-50 p-4 rounded-md">

@@ -150,11 +150,14 @@ export const CalendarModal = ({ slotInfo }: CalendarModalProps) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={handleEventClose}>
-      <DialogContent>
+      <DialogContent className="max-h-[90vh] md:max-h-2/3 overflow-y-auto">
         <DialogTitle>{isCreating ? "Create Event" : "Edit Event"}</DialogTitle>
         <form
           id="create-event-form"
-          onSubmit={form.handleSubmit(handleFormSubmit)}
+          onSubmit={(e) => {
+            e.preventDefault();
+            setTimeout(() => form.handleSubmit(handleFormSubmit)(), 0);
+          }}
           className="flex flex-col gap-4"
         >
           <FieldGroup>
@@ -275,7 +278,9 @@ export const CalendarModal = ({ slotInfo }: CalendarModalProps) => {
           </FieldGroup>
 
           <FieldGroup>
-            <p className="text-sm font-medium text-muted-foreground">Contact Details</p>
+            <p className="text-sm font-medium text-muted-foreground">
+              Contact Details
+            </p>
             <div className="grid grid-cols-2 gap-4">
               <Controller
                 name="contactFirstName"
