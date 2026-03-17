@@ -83,17 +83,18 @@ export const CalendarToolbar = ({
           </Select>
         </>
       </div>
-      <div className="flex gap-4 flex-nowrap items-center">
-        <h2 className="text-lg font-semibold">{getViewDateFormat()}</h2>
+
+      <h2 className="flex text-lg font-semibold ">{getViewDateFormat()}</h2>
+      <div className="flex gap-4 flex-nowrap items-center relative w-full md:w-auto">
         {session?.user.role === UserRole.ADMIN && (
           <Button
-            className="px-3 py-1 bg-green-500 text-white"
+            className="px-3 py-1 bg-green-500 text-white hidden md:flex"
             onClick={() => onCreateEvent()}
           >
             + Add Event
           </Button>
         )}
-        <AuthUserMenu />
+        <AuthUserMenu className="absolute top-0 right-0 md:static " />
       </div>
     </div>
   );
