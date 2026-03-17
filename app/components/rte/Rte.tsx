@@ -6,6 +6,7 @@ import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
 import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
 import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
+import { ListPlugin } from "@lexical/react/LexicalListPlugin";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import {
   $getRoot,
@@ -18,6 +19,29 @@ import {
   $getSelection,
   $isRangeSelection,
 } from "lexical";
+import {
+  INSERT_ORDERED_LIST_COMMAND,
+  INSERT_UNORDERED_LIST_COMMAND,
+  ListNode,
+  ListItemNode,
+  $isListNode,
+} from "@lexical/list";
+import {
+  LuBold,
+  LuImage,
+  LuItalic,
+  LuList,
+  LuListOrdered,
+  LuRedo2,
+  LuStrikethrough,
+  LuUnderline,
+  LuUndo2,
+} from "react-icons/lu";
+import { ImageNode } from "./nodes/ImageNode";
+import ImagesPlugin, {
+  INSERT_IMAGE_COMMAND,
+  compressImage,
+} from "./plugins/ImagesPlugin";
 
 interface RteProps {
   value?: string;
@@ -26,12 +50,10 @@ interface RteProps {
   [key: string]: unknown;
 }
 
-// Simple error boundary component
 function ErrorBoundary({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-// Plugin to set initial value (only once on mount)
 function InitialValuePlugin({ value }: { value: string }) {
   const [editor] = useLexicalComposerContext();
   const isInitialized = useRef(false);
@@ -40,18 +62,15 @@ function InitialValuePlugin({ value }: { value: string }) {
     if (value && !isInitialized.current) {
       editor.update(() => {
         try {
-          // Try to parse as JSON (serialized editor state)
           const editorState = editor.parseEditorState(value);
           editor.setEditorState(editorState);
         } catch {
-          // If not JSON, treat as plain text
           const root = $getRoot();
           root.clear();
           const paragraph = $createParagraphNode();
           const textNode = $createTextNode(value);
           paragraph.append(textNode);
           root.append(paragraph);
-          // Move cursor to the end
           paragraph.selectEnd();
         }
       });
@@ -62,7 +81,6 @@ function InitialValuePlugin({ value }: { value: string }) {
   return null;
 }
 
-// Toolbar Button Component
 const ToolbarButton = ({
   onClick,
   active,
@@ -86,15 +104,18 @@ const ToolbarButton = ({
   </button>
 );
 
-// Toolbar Plugin
 function ToolbarPlugin() {
   const [editor] = useLexicalComposerContext();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [formatStates, setFormatStates] = useState({
     bold: false,
     italic: false,
     underline: false,
     strikethrough: false,
   });
+  const [listType, setListType] = useState<
+    "bullet" | "number" | "check" | null
+  >(null);
 
   const updateToolbar = useCallback(() => {
     const selection = $getSelection();
@@ -105,6 +126,12 @@ function ToolbarPlugin() {
         underline: selection.hasFormat("underline"),
         strikethrough: selection.hasFormat("strikethrough"),
       });
+      const anchorNode = selection.anchor.getNode();
+      const element =
+        anchorNode.getKey() === "root"
+          ? anchorNode
+          : anchorNode.getTopLevelElementOrThrow();
+      setListType($isListNode(element) ? element.getListType() : null);
     }
   }, []);
 
@@ -114,30 +141,55 @@ function ToolbarPlugin() {
     });
   }, [editor, updateToolbar]);
 
+  const handleImageUpload = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      const src = await compressImage(file);
+      editor.dispatchCommand(INSERT_IMAGE_COMMAND, { src, altText: file.name });
+      e.target.value = "";
+    },
+    [editor],
+  );
+
   const formatButtons = [
-    { format: "bold", label: <strong>B</strong>, title: "Bold (Ctrl+B)" },
-    { format: "italic", label: <em>I</em>, title: "Italic (Ctrl+I)" },
-    { format: "underline", label: <u>U</u>, title: "Underline (Ctrl+U)" },
-    { format: "strikethrough", label: <s>S</s>, title: "Strikethrough" },
+    { format: "bold", label: <LuBold fontSize={18} />, title: "Bold (Ctrl+B)" },
+    {
+      format: "italic",
+      label: <LuItalic fontSize={18} />,
+      title: "Italic (Ctrl+I)",
+    },
+    {
+      format: "underline",
+      label: <LuUnderline fontSize={18} />,
+      title: "Underline (Ctrl+U)",
+    },
+    {
+      format: "strikethrough",
+      label: <LuStrikethrough fontSize={18} />,
+      title: "Strikethrough",
+    },
   ] as const;
 
   return (
-    <div className="flex gap-1 border-b border-gray-300 pb-2 mb-2 flex-wrap">
+    <div className="flex border-b border-gray-300 pb-2 mb-2 flex-wrap">
       <ToolbarButton
         onClick={() => editor.dispatchCommand(UNDO_COMMAND, undefined)}
         active={false}
         title="Undo (Ctrl+Z)"
       >
-        ↶
+        <LuUndo2 fontSize="18" />
       </ToolbarButton>
       <ToolbarButton
         onClick={() => editor.dispatchCommand(REDO_COMMAND, undefined)}
         active={false}
         title="Redo (Ctrl+Y)"
       >
-        ↷
+        <LuRedo2 fontSize="18" />
       </ToolbarButton>
+
       <div className="w-px bg-gray-300 mx-1" />
+
       {formatButtons.map(({ format, label, title }) => (
         <ToolbarButton
           key={format}
@@ -148,13 +200,70 @@ function ToolbarPlugin() {
           {label}
         </ToolbarButton>
       ))}
+
+      <div className="w-px bg-gray-300 mx-1" />
+
+      <ToolbarButton
+        onClick={() =>
+          editor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, undefined)
+        }
+        active={listType === "bullet"}
+        title="Bullet List"
+      >
+        <LuList fontSize="18" />
+      </ToolbarButton>
+      <ToolbarButton
+        onClick={() =>
+          editor.dispatchCommand(INSERT_ORDERED_LIST_COMMAND, undefined)
+        }
+        active={listType === "number"}
+        title="Numbered List"
+      >
+        <LuListOrdered fontSize="18" />
+      </ToolbarButton>
+
+      <div className="w-px bg-gray-300 mx-1" />
+
+      <ToolbarButton
+        onClick={() => fileInputRef.current?.click()}
+        active={false}
+        title="Insert Image"
+      >
+        <LuImage fontSize="18" />
+      </ToolbarButton>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleImageUpload}
+      />
     </div>
   );
 }
 
-export const Rte = ({ value = "", onChange, disabled = false, ...props }: RteProps) => {
+export const Rte = ({
+  value = "",
+  onChange,
+  disabled = false,
+  ...props
+}: RteProps) => {
+  // Suppress known Lexical flushSync warning — triggered when the editor loses
+  // focus during a form submit. This is a Lexical internals issue, not our code.
+  useEffect(() => {
+    const original = console.error;
+    console.error = (...args: unknown[]) => {
+      if (typeof args[0] === "string" && args[0].includes("flushSync")) return;
+      original.apply(console, args);
+    };
+    return () => {
+      console.error = original;
+    };
+  }, []);
+
   const initialConfig = {
     namespace: "RteEditor",
+    nodes: [ListNode, ListItemNode, ImageNode],
     theme: {
       paragraph: "mb-1",
       text: {
@@ -163,15 +272,19 @@ export const Rte = ({ value = "", onChange, disabled = false, ...props }: RtePro
         underline: "underline",
         strikethrough: "line-through",
       },
+      list: {
+        ul: "list-disc ml-4",
+        ol: "list-decimal ml-4",
+      },
     },
-    onError: (error: Error) => {
-      console.error(error);
-    },
+    onError: (error: Error) => console.error(error),
     editable: !disabled,
   };
 
   const handleChange = (editorState: EditorState) => {
-    onChange?.(JSON.stringify(editorState.toJSON()));
+    setTimeout(() => {
+      onChange?.(JSON.stringify(editorState.toJSON()));
+    }, 0);
   };
 
   return (
@@ -183,7 +296,12 @@ export const Rte = ({ value = "", onChange, disabled = false, ...props }: RtePro
       >
         {!disabled && <ToolbarPlugin />}
         <RichTextPlugin
-          contentEditable={<ContentEditable className="focus:outline-none min-h-24" {...props} />}
+          contentEditable={
+            <ContentEditable
+              className="focus:outline-none max-h-128 min-h-128 overflow-y-auto"
+              {...props}
+            />
+          }
           placeholder={
             disabled ? null : (
               <div className="absolute top-14 left-2 text-gray-400 pointer-events-none">
@@ -194,7 +312,9 @@ export const Rte = ({ value = "", onChange, disabled = false, ...props }: RtePro
           ErrorBoundary={ErrorBoundary}
         />
         <HistoryPlugin />
-        <OnChangePlugin onChange={handleChange} />
+        <ListPlugin />
+        <ImagesPlugin />
+        <OnChangePlugin onChange={handleChange} ignoreSelectionChange />
         <InitialValuePlugin value={value} />
       </div>
     </LexicalComposer>
