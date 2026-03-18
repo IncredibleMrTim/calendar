@@ -5,7 +5,7 @@ import { LogoSm } from "./components/logo/LogoSm";
 export default function Home() {
   return (
     <main>
-      <div className="w-12 pt-3 mx-auto ">
+      <div className="w-12 pt-3 mx-auto flex md:hidden">
         <LogoSm />
       </div>
       <div className="flex flex-row-reverse w-full">
