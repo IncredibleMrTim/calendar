@@ -13,6 +13,7 @@ import { CalendarView } from "@/stores/useCalendarStore";
 import { useCalendarStore } from "@/stores/useCalendarStore";
 import { useSession } from "next-auth/react";
 import { UserRole } from "@prisma/client";
+import { LogoSm } from "../logo/LogoSm";
 
 interface CalendarToolbarProps {
   currentDate: Date;
@@ -54,8 +55,11 @@ export const CalendarToolbar = ({
   };
 
   return (
-    <div className="flex flex-col-reverse md:flex-row justify-between items-center p-2 bg-gray-50 border-b">
-      <div className="flex gap-2 justify-start">
+    <div className="flex flex-col-reverse md:flex-row justify-between items-center p-2  border-b">
+      <div className="flex gap-2 justify-start items-center">
+        <div className="w-30 mx-4 hidden md:flex">
+          <LogoSm />
+        </div>
         <div className="w-max-150">
           <DatePicker
             aria-label="Select calendar date"

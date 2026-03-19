@@ -71,7 +71,13 @@ export const AuthUserMenu = (props: AuthUserMenuProps) => {
           </PopoverContent>
         </Popover>
       ) : (
-        <Button onClick={() => router.push("/auth/signin")}>Login</Button>
+        <Button
+          variant="link"
+          onClick={() => router.push("/auth/signin")}
+          className="m-0 p-0 h-auto"
+        >
+          Login
+        </Button>
       )}
     </div>
   );
