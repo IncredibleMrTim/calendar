@@ -18,6 +18,8 @@ model User {
   firstName String
   surname   String
   role      UserRole @default(USER)
+  password  String?
+  provider  AuthProvider
 }
 
 model Event {
@@ -38,4 +40,9 @@ model Event {
 enum UserRole {
   USER
   ADMIN
+}
+
+enum AuthProvider {
+  GOOGLE
+  MANUAL
 }

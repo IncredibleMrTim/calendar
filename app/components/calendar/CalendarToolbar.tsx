@@ -41,6 +41,7 @@ export const CalendarToolbar = ({
 }: CalendarToolbarProps) => {
   const currentView = useCalendarStore((state) => state.currentView);
   const { data: session } = useSession();
+  console.log(session);
   const getViewDateFormat = () => {
     switch (currentView) {
       case CalendarView.DAY:
