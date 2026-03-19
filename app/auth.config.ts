@@ -1,5 +1,5 @@
 import NextAuth, { NextAuthOptions } from "next-auth";
-import GoogleProvider from "next-auth/providers/google";
+import GoogleProvider, { GoogleProfile } from "next-auth/providers/google";
 import prisma from "@/lib/prisma";
 import { AuthProvider } from "@prisma/client";
 import CredentialsProvider from "next-auth/providers/credentials";
@@ -100,7 +100,7 @@ export const authOptions: NextAuthOptions = {
       }
 
       if (profile) {
-        const googleProfile = profile as any;
+        const googleProfile = profile as GoogleProfile;
         token.firstName = googleProfile?.given_name || "";
         token.lastName = googleProfile?.family_name || "";
         token.picture = googleProfile?.picture || "";

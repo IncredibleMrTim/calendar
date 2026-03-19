@@ -26,7 +26,7 @@ interface ManualAuthProps {
 
 export const ManualAuth = ({ action, onAuthActionChange }: ManualAuthProps) => {
   const router = useRouter();
-
+  const isRegister = action === ManualAuthAction.REGISTER;
   const formSchema = z
     .object({
       email: z.union([z.email("Invalid email address"), z.literal("")]),
@@ -65,6 +65,8 @@ export const ManualAuth = ({ action, onAuthActionChange }: ManualAuthProps) => {
     formState: { errors },
     control,
     setError,
+    watch,
+    reset,
   } = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     mode: "onSubmit",
@@ -77,8 +79,19 @@ export const ManualAuth = ({ action, onAuthActionChange }: ManualAuthProps) => {
     },
   });
 
+  const [email, password, firstName, lastName, confirmPassword] = watch([
+    "email",
+    "password",
+    "firstName",
+    "lastName",
+    "confirmPassword",
+  ]);
+  const isSubmitDisabled = !isRegister
+    ? !email || !password
+    : !email || !password || !firstName || !lastName || !confirmPassword;
+
   const handleManualSignin = async (data: z.infer<typeof formSchema>) => {
-    if (action === ManualAuthAction.SIGNIN) {
+    if (!isRegister) {
       const result = await signIn("credentials", {
         email: data.email,
         password: data.password,
@@ -121,11 +134,17 @@ export const ManualAuth = ({ action, onAuthActionChange }: ManualAuthProps) => {
     }
   };
 
+  const handleOnActionChange = (action: ManualAuthAction) => {
+    reset();
+    onAuthActionChange(action);
+  };
+
   return (
     <form onSubmit={handleSubmit(handleManualSignin)} id="manual-signin">
       <FieldGroup>
-        {action === ManualAuthAction.REGISTER && (
+        {isRegister && (
           <>
+            <h1 className="text-2xl">Register</h1>
             <Controller
               name="firstName"
               control={control}
@@ -192,7 +211,7 @@ export const ManualAuth = ({ action, onAuthActionChange }: ManualAuthProps) => {
             </Field>
           )}
         />
-        {action === ManualAuthAction.REGISTER && (
+        {isRegister && (
           <Controller
             name="confirmPassword"
             control={control}
@@ -217,19 +236,20 @@ export const ManualAuth = ({ action, onAuthActionChange }: ManualAuthProps) => {
               className="flex-1"
               type="button"
               variant="secondary"
-              onClick={() => onAuthActionChange(ManualAuthAction.SIGNIN)}
+              onClick={() => handleOnActionChange(ManualAuthAction.SIGNIN)}
             >
               Back
             </Button>
           )}
-          <Button type="submit" className="flex-1">
-            Submit
+          <Button type="submit" className="flex-1" disabled={isSubmitDisabled}>
+            {isRegister ? "Create" : "Login"}
           </Button>
-          {action !== ManualAuthAction.REGISTER && (
+          {!isRegister && (
             <Button
               className="flex-1"
               type="button"
-              onClick={() => onAuthActionChange(ManualAuthAction.REGISTER)}
+              variant="outline"
+              onClick={() => handleOnActionChange(ManualAuthAction.REGISTER)}
             >
               Register
             </Button>

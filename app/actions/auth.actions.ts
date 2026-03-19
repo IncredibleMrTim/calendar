@@ -12,14 +12,26 @@ export const signUp = async (
   password: string,
   firstName: string,
   surname: string,
-): Promise<{ success: true; user: User } | { success: false; error: string }> => {
+): Promise<
+  { success: true; user: User } | { success: false; error: string }
+> => {
   const existing = await prisma.user.findUnique({ where: { email } });
-  if (existing) return { success: false, error: "Email already in use" };
+  if (existing)
+    return {
+      success: false,
+      error: "Email address already in use, please change and try again",
+    };
 
   const hashedPassword = await bcrypt.hash(password, 12);
 
   const user = await prisma.user.create({
-    data: { email, firstName, surname, password: hashedPassword, provider: "MANUAL" },
+    data: {
+      email,
+      firstName,
+      surname,
+      password: hashedPassword,
+      provider: "MANUAL",
+    },
   });
 
   return { success: true, user };
