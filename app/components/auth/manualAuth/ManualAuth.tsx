@@ -144,7 +144,7 @@ export const ManualAuth = ({ action, onAuthActionChange }: ManualAuthProps) => {
       <FieldGroup>
         {isRegister && (
           <>
-            <h1 className="text-2xl">Register</h1>
+            <div className="text-2xl">Register</div>
             <Controller
               name="firstName"
               control={control}
