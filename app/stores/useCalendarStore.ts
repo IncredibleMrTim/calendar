@@ -11,18 +11,24 @@ export enum CalendarView {
 
 interface CalendarStore {
   currentView: CalendarView;
+  currentDate: Date;
 
   // Actions
   setCurrentView: (view: CalendarView) => void;
+  setCurrentDate: (date: Date) => void;
 }
 
 export const useCalendarStore = create<CalendarStore>()(
   devtools(
     (set) => ({
       currentView: CalendarView.MONTH,
+      currentDate: new Date(),
 
       setCurrentView: (view: CalendarView) => {
         set({ currentView: view }, false, "setCurrentView");
+      },
+      setCurrentDate: (date: Date) => {
+        set({ currentDate: date }, false, "setCurrentDate");
       },
     }),
     {
