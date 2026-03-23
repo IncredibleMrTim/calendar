@@ -35,13 +35,14 @@ interface CalendarEvent extends EventDTO {
 
 export const Calendar = () => {
   const isMobile = useIsMobile();
-  const [currentDate, setCurrentDate] = useState(new Date());
   const [slotInfo, setSlotInfo] = useState<SlotInfo | undefined>(undefined);
   const { data: session } = useSession();
 
   // Subscribe to only what this component needs
   const currentView = useCalendarStore((state) => state.currentView);
   const setCurrentView = useCalendarStore((state) => state.setCurrentView);
+  const currentDate = useCalendarStore((state) => state.currentDate);
+  const setCurrentDate = useCalendarStore((state) => state.setCurrentDate);
 
   const events = useEventStore((state) => state.events);
   const fetchEvents = useEventStore((state) => state.fetchEvents);

@@ -13,7 +13,7 @@ export const CalendarDisplayModal = () => {
     <Dialog open={!!selectedEvent} onOpenChange={handleEventClose}>
       <DialogContent className="max-h-[90vh] md:max-h-2/3 overflow-y-auto">
         <DialogTitle>
-          <h1 className="text-2xl">{selectedEvent?.title}</h1>
+          <div className="text-2xl">{selectedEvent?.title}</div>
         </DialogTitle>
 
         <div className="flex flex-col">

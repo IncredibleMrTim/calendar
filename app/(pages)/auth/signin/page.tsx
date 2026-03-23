@@ -34,6 +34,7 @@ export default function SignIn() {
   return (
     <>
       <AuthRedirect />
+
       <div className="min-h-[90vh] flex items-end lg:items-center justify-end lg:justify-center py-4 lg:py-12 px-4 sm:px-6 lg:px-8 sticky bottom-0">
         <div className="flex flex-col gap-4 max-w-md w-full ">
           <div className="flex flex-col justify-center w-full gap-4">
