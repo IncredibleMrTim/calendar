@@ -64,7 +64,12 @@ export const useEventStore = create<EventStore>()(
 
       handleEventClose: () => {
         set(
-          { selectedEvent: undefined, isCreating: false, isDeleting: false },
+          {
+            selectedEvent: undefined,
+            isCreating: false,
+            isDeleting: false,
+            isEventInPast: false,
+          },
           false,
           "handleEventClose",
         );

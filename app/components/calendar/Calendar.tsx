@@ -83,6 +83,8 @@ export const Calendar = () => {
   });
 
   const handleSelectSlot = (slotData: SlotInfo) => {
+    if (slotData.end < new Date() || session?.user.role !== UserRole.ADMIN)
+      return;
     if (isMobile) {
       setSlotInfo(slotData);
       onCreateEvent();
