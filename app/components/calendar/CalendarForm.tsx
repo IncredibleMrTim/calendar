@@ -109,35 +109,114 @@ export const CalendarForm = ({ slotInfo }: CalendarFormProps) => {
           e.preventDefault();
           setTimeout(() => form.handleSubmit(handleFormSubmit)(), 0);
         }}
-        className="flex flex-col gap-4"
+        className="flex flex-col gap-4 justify-between p-4 h-full pb-16 md:pb-0"
       >
-        <FieldGroup>
-          <Controller
-            name="title"
-            control={form.control}
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid} className="relative">
-                <FieldLabel>Title</FieldLabel>
-                <Input {...field} disabled={isEventInPast} />
-                {fieldState.invalid && (
-                  <FieldError
-                    errors={[fieldState.error]}
-                    className="absolute -bottom-7 right-0 w-auto!"
-                  />
-                )}
-              </Field>
-            )}
-          />
-          <div className="grid grid-cols-2 gap-4">
+        <div className={`overflow-y-auto`}>
+          <FieldGroup>
             <Controller
-              name="startDate"
+              name="title"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid} className="">
+                  <FieldLabel>Title</FieldLabel>
+                  <Input {...field} disabled={isEventInPast} />
+                  {fieldState.invalid && (
+                    <FieldError
+                      errors={[fieldState.error]}
+                      className="absolute -bottom-7 right-0 w-auto!"
+                    />
+                  )}
+                </Field>
+              )}
+            />
+            <div className="grid grid-cols-2 gap-4">
+              <Controller
+                name="startDate"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid} className="relative">
+                    <FieldLabel>Start Date</FieldLabel>
+                    <DatePicker
+                      {...field}
+                      onSelect={field.onChange}
+                      data-invalid={fieldState.invalid}
+                      disabled={isEventInPast}
+                    />
+                    {fieldState.invalid && (
+                      <FieldError
+                        errors={[fieldState.error]}
+                        className="absolute -bottom-7 right-0 w-auto!"
+                      />
+                    )}
+                  </Field>
+                )}
+              />
+              <Controller
+                name="startTime"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid} className="relative">
+                    <FieldLabel>Start Time</FieldLabel>
+                    <Input type="time" {...field} disabled={isEventInPast} />
+                    {fieldState.invalid && (
+                      <FieldError
+                        errors={[fieldState.error]}
+                        className="absolute -bottom-7 right-0 w-auto!"
+                      />
+                    )}
+                  </Field>
+                )}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <Controller
+                name="endDate"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid} className="relative">
+                    <FieldLabel>End Date</FieldLabel>
+                    <DatePicker
+                      value={field.value}
+                      onSelect={field.onChange}
+                      data-invalid={fieldState.invalid}
+                      disabled={isEventInPast}
+                    />
+                    {fieldState.invalid && (
+                      <FieldError
+                        errors={[fieldState.error]}
+                        className="absolute -bottom-7 right-0 w-auto!"
+                      />
+                    )}
+                  </Field>
+                )}
+              />
+              <Controller
+                name="endTime"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid} className="relative">
+                    <FieldLabel>End Time</FieldLabel>
+                    <Input type="time" {...field} disabled={isEventInPast} />
+                    {fieldState.invalid && (
+                      <FieldError
+                        errors={[fieldState.error]}
+                        className="absolute -bottom-7 right-0 w-auto!"
+                      />
+                    )}
+                  </Field>
+                )}
+              />
+            </div>
+            <Controller
+              name="description"
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid} className="relative">
-                  <FieldLabel>Start Date</FieldLabel>
-                  <DatePicker
+                  <FieldLabel className="text-muted-foreground text-lg">
+                    Description
+                  </FieldLabel>
+                  <Rte
                     {...field}
-                    onSelect={field.onChange}
                     data-invalid={fieldState.invalid}
                     disabled={isEventInPast}
                   />
@@ -150,190 +229,129 @@ export const CalendarForm = ({ slotInfo }: CalendarFormProps) => {
                 </Field>
               )}
             />
-            <Controller
-              name="startTime"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid} className="relative">
-                  <FieldLabel>Start Time</FieldLabel>
-                  <Input type="time" {...field} disabled={isEventInPast} />
-                  {fieldState.invalid && (
-                    <FieldError
-                      errors={[fieldState.error]}
-                      className="absolute -bottom-7 right-0 w-auto!"
-                    />
+          </FieldGroup>
+
+          <FieldGroup>
+            <div className="space-y-2 my-6">
+              <FieldLabel className="text-muted-foreground text-lg">
+                Contact Details
+              </FieldLabel>
+              <div className="grid grid-cols-2 gap-4">
+                <Controller
+                  name="contactFirstName"
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field
+                      data-invalid={fieldState.invalid}
+                      className="relative"
+                    >
+                      <FieldLabel>First Name</FieldLabel>
+                      <Input {...field} disabled={isEventInPast} />
+                      {fieldState.invalid && (
+                        <FieldError
+                          errors={[fieldState.error]}
+                          className="absolute -bottom-7 right-0 w-auto!"
+                        />
+                      )}
+                    </Field>
                   )}
-                </Field>
-              )}
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <Controller
-              name="endDate"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid} className="relative">
-                  <FieldLabel>End Date</FieldLabel>
-                  <DatePicker
-                    value={field.value}
-                    onSelect={field.onChange}
-                    data-invalid={fieldState.invalid}
-                    disabled={isEventInPast}
-                  />
-                  {fieldState.invalid && (
-                    <FieldError
-                      errors={[fieldState.error]}
-                      className="absolute -bottom-7 right-0 w-auto!"
-                    />
-                  )}
-                </Field>
-              )}
-            />
-            <Controller
-              name="endTime"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid} className="relative">
-                  <FieldLabel>End Time</FieldLabel>
-                  <Input type="time" {...field} disabled={isEventInPast} />
-                  {fieldState.invalid && (
-                    <FieldError
-                      errors={[fieldState.error]}
-                      className="absolute -bottom-7 right-0 w-auto!"
-                    />
-                  )}
-                </Field>
-              )}
-            />
-          </div>
-          <Controller
-            name="description"
-            control={form.control}
-            render={({ field, fieldState }) => (
-              <Field
-                data-invalid={fieldState.invalid}
-                className="relative"
-              >
-                <FieldLabel>Description</FieldLabel>
-                <Rte
-                  {...field}
-                  data-invalid={fieldState.invalid}
-                  disabled={isEventInPast}
                 />
-                {fieldState.invalid && (
-                  <FieldError
-                    errors={[fieldState.error]}
-                    className="absolute -bottom-7 right-0 w-auto!"
-                  />
-                )}
-              </Field>
-            )}
-          />
-        </FieldGroup>
-
-        <FieldGroup>
-          <p className="text-sm font-medium text-muted-foreground">
-            Contact Details
-          </p>
-          <div className="grid grid-cols-2 gap-4">
-            <Controller
-              name="contactFirstName"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid} className="relative">
-                  <FieldLabel>First Name</FieldLabel>
-                  <Input {...field} disabled={isEventInPast} />
-                  {fieldState.invalid && (
-                    <FieldError
-                      errors={[fieldState.error]}
-                      className="absolute -bottom-7 right-0 w-auto!"
-                    />
+                <Controller
+                  name="contactLastName"
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field
+                      data-invalid={fieldState.invalid}
+                      className="relative"
+                    >
+                      <FieldLabel>Last Name</FieldLabel>
+                      <Input {...field} disabled={isEventInPast} />
+                      {fieldState.invalid && (
+                        <FieldError
+                          errors={[fieldState.error]}
+                          className="absolute -bottom-7 right-0 w-auto!"
+                        />
+                      )}
+                    </Field>
                   )}
-                </Field>
-              )}
-            />
-            <Controller
-              name="contactLastName"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid} className="relative">
-                  <FieldLabel>Last Name</FieldLabel>
-                  <Input {...field} disabled={isEventInPast} />
-                  {fieldState.invalid && (
-                    <FieldError
-                      errors={[fieldState.error]}
-                      className="absolute -bottom-7 right-0 w-auto!"
-                    />
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <Controller
+                  name="contactPhone"
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field
+                      data-invalid={fieldState.invalid}
+                      className="relative"
+                    >
+                      <FieldLabel>Phone</FieldLabel>
+                      <Input type="tel" {...field} disabled={isEventInPast} />
+                      {fieldState.invalid && (
+                        <FieldError
+                          errors={[fieldState.error]}
+                          className="absolute -bottom-7 right-0 w-auto!"
+                        />
+                      )}
+                    </Field>
                   )}
-                </Field>
-              )}
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <Controller
-              name="contactPhone"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid} className="relative">
-                  <FieldLabel>Phone</FieldLabel>
-                  <Input type="tel" {...field} disabled={isEventInPast} />
-                  {fieldState.invalid && (
-                    <FieldError
-                      errors={[fieldState.error]}
-                      className="absolute -bottom-7 right-0 w-auto!"
-                    />
+                />
+                <Controller
+                  name="contactEmail"
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field
+                      data-invalid={fieldState.invalid}
+                      className="relative"
+                    >
+                      <FieldLabel>Email</FieldLabel>
+                      <Input type="email" {...field} disabled={isEventInPast} />
+                      {fieldState.invalid && (
+                        <FieldError
+                          errors={[fieldState.error]}
+                          className="absolute -bottom-7 right-0 w-auto!"
+                        />
+                      )}
+                    </Field>
                   )}
-                </Field>
-              )}
-            />
-            <Controller
-              name="contactEmail"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid} className="relative">
-                  <FieldLabel>Email</FieldLabel>
-                  <Input type="email" {...field} disabled={isEventInPast} />
-                  {fieldState.invalid && (
-                    <FieldError
-                      errors={[fieldState.error]}
-                      className="absolute -bottom-7 right-0 w-auto!"
-                    />
-                  )}
-                </Field>
-              )}
-            />
-          </div>
-        </FieldGroup>
-
-        <div className="flex justify-between flex-row-reverse">
-          <div className="flex gap-2 justify-end">
-            {selectedEvent && (
-              <>
-                <Button
-                  type="button"
-                  variant="destructive"
-                  onClick={() =>
-                    !isDeleting ? setIsDeleting(true) : handleDelete()
-                  }
-                >
-                  {!isDeleting ? "Delete Event" : "Confirm Delete!"}
-                </Button>
-                {isDeleting && (
+                />
+              </div>
+            </div>
+          </FieldGroup>
+        </div>
+        <div className="bg-white p-4 sticky bottom-0 -mx-4 shadow rounded-b-md">
+          <div className="flex justify-between flex-row-reverse">
+            <div className="flex gap-2 justify-end">
+              {selectedEvent && (
+                <>
                   <Button
                     type="button"
-                    variant="secondary"
-                    onClick={() => setIsDeleting(false)}
+                    variant="destructive"
+                    onClick={() =>
+                      !isDeleting ? setIsDeleting(true) : handleDelete()
+                    }
                   >
-                    Cancel
+                    {!isDeleting ? "Delete Event" : "Confirm Delete!"}
                   </Button>
-                )}
-              </>
-            )}
-            {!isDeleting && !isEventInPast && (
-              <Button type="submit">Submit</Button>
-            )}
+                  {isDeleting && (
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      onClick={() => setIsDeleting(false)}
+                    >
+                      Cancel
+                    </Button>
+                  )}
+                </>
+              )}
+              {!isDeleting && !isEventInPast && (
+                <Button type="submit">Submit</Button>
+              )}
+            </div>
+            <Button onClick={handleEventClose} variant="outline">
+              Close
+            </Button>
           </div>
-          <Button onClick={handleEventClose}>Close</Button>
         </div>
       </form>
       {isDeleting && (
