@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { format } from "date-fns";
-import { Calendar as CalendarIcon } from "lucide-react";
+import { LuCalendar } from "react-icons/lu";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -45,7 +45,7 @@ export function DatePicker({
           data-invalid={invalid}
           disabled={disabled}
         >
-          <CalendarIcon className="mr-2 size-4" />
+          <LuCalendar className="mr-2 size-4" />
           {value ? format(value, isMobile ? "dd/MM/yy" : "PPP") : placeholder}
           {isOpen ? <LuChevronUp /> : <LuChevronDown />}
         </Button>
