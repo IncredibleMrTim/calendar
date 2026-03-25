@@ -70,6 +70,11 @@ export const Drawer = ({ mode = "view", slotInfo }: DrawerProps) => {
     >
       <DrawerContent
         className={drawerContent({ device: isMobile ? "mobile" : "desktop" })}
+        onOverlayClick={
+          !isMobile && (mode === "view" || isEventInPast)
+            ? handleEventClose
+            : undefined
+        }
       >
         <div
           className={drawerInner({ device: isMobile ? "mobile" : "desktop" })}
@@ -100,113 +105,103 @@ export const Drawer = ({ mode = "view", slotInfo }: DrawerProps) => {
             <CalendarForm slotInfo={slotInfo} />
           ) : selectedEvent ? (
             <>
-              {/* Date & Time */}
-              <div className="bg-white rounded-lg border border-zinc-100 shadow-sm divide-y divide-zinc-100">
-                <div className="flex items-center gap-3 px-4 py-3">
-                  <LuCalendarDays
-                    size={16}
-                    className="text-zinc-400 shrink-0"
-                  />
-                  <div>
-                    <p className="text-[11px] font-medium text-zinc-400 uppercase tracking-wider">
+              <div className="flex-1 overflow-y-auto p-5 flex flex-col gap-4">
+                {/* Date & Time */}
+                <div className="flex gap-8">
+                  <div className="flex flex-col gap-2">
+                    <p className="text-muted-foreground text-lg font-medium">
                       Start
                     </p>
-                    <p className="text-sm text-zinc-700">
-                      {format(
-                        new Date(selectedEvent.startDate),
-                        "do MMMM yyyy",
-                      )}
-                    </p>
+                    <div className="flex gap-2 items-center">
+                      <LuCalendarDays
+                        size={16}
+                        className="text-zinc-400 shrink-0"
+                      />
+                      <p className="text-sm text-zinc-700">
+                        {format(
+                          new Date(selectedEvent.startDate),
+                          "do MMMM yyyy",
+                        )}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-3 text-sm text-zinc-500">
+                      <LuClock size={13} className="text-zinc-400" />
+                      {format(new Date(selectedEvent.startDate), "HH:mm")}
+                    </div>
                   </div>
-                  <div className="ml-auto flex items-center gap-1.5 text-sm text-zinc-500">
-                    <LuClock size={13} className="text-zinc-400" />
-                    {format(new Date(selectedEvent.startDate), "HH:mm")}
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 px-4 py-3">
-                  <LuCalendarDays
-                    size={16}
-                    className="text-zinc-400 shrink-0"
-                  />
-                  <div>
-                    <p className="text-[11px] font-medium text-zinc-400 uppercase tracking-wider">
+                  <div className="flex flex-col gap-2">
+                    <p className="text-muted-foreground text-lg font-medium">
                       End
                     </p>
-                    <p className="text-sm text-zinc-700">
-                      {format(
-                        new Date(
-                          selectedEvent.endDate ?? selectedEvent.startDate,
-                        ),
-                        "do MMMM yyyy",
-                      )}
-                    </p>
+                    <div className="flex gap-2 items-center">
+                      <LuCalendarDays
+                        size={16}
+                        className="text-zinc-400 shrink-0"
+                      />
+                      <p className="text-sm text-zinc-700">
+                        {format(
+                          new Date(selectedEvent.endDate),
+                          "do MMMM yyyy",
+                        )}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2.5 text-sm text-zinc-500">
+                      <LuClock size={13} className="text-zinc-400" />
+                      {format(new Date(selectedEvent.endDate), "HH:mm")}
+                    </div>
                   </div>
-                  <div className="ml-auto flex items-center gap-1.5 text-sm text-zinc-500">
-                    <LuClock size={13} className="text-zinc-400" />
-                    {format(
-                      new Date(
-                        selectedEvent.endDate ?? selectedEvent.startDate,
-                      ),
-                      "HH:mm",
-                    )}
+                </div>
+
+                {/* Description */}
+                <div className="flex flex-col gap-2">
+                  <p className="text-muted-foreground text-lg font-medium">
+                    Description
+                  </p>
+                  <div
+                    className="[&_ul]:list-disc [&_ul]:ml-4 [&_ol]:list-decimal [&_ol]:ml-4 text-sm text-zinc-700 leading-relaxed"
+                    dangerouslySetInnerHTML={{
+                      __html: lexicalToHtml(selectedEvent.description),
+                    }}
+                  />
+                </div>
+
+                {/* Contact Details */}
+                <div className="flex flex-col gap-2">
+                  <p className="text-muted-foreground text-lg font-medium">
+                    Contact Details
+                  </p>
+                  <div className="divide-y divide-zinc-100">
+                    <div className="flex items-center gap-3 py-3">
+                      <LuUser size={15} className="text-zinc-400 shrink-0" />
+                      <span className="text-sm text-zinc-700">
+                        {selectedEvent.contactFirstName}{" "}
+                        {selectedEvent.contactLastName}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-3 py-3">
+                      <LuPhone size={15} className="text-zinc-400 shrink-0" />
+                      <span className="text-sm text-zinc-700">
+                        {selectedEvent.contactPhone}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-3 py-3">
+                      <LuMail size={15} className="text-zinc-400 shrink-0" />
+                      <span className="text-sm text-zinc-700">
+                        {selectedEvent.contactEmail}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* Description */}
-              <div className="bg-white rounded-lg border border-zinc-100 shadow-sm">
-                <h2 className="text-xs font-semibold text-zinc-400 uppercase tracking-widest px-4 pt-3 pb-2 border-b border-zinc-100">
-                  Description
-                </h2>
-                <div
-                  className="[&_ul]:list-disc [&_ul]:ml-4 [&_ol]:list-decimal [&_ol]:ml-4 text-sm text-zinc-700 leading-relaxed p-4"
-                  dangerouslySetInnerHTML={{
-                    __html: lexicalToHtml(selectedEvent.description),
-                  }}
-                />
-              </div>
-
-              {/* Contact Details */}
-              <div className="bg-white rounded-lg border border-zinc-100 shadow-sm">
-                <h2 className="text-xs font-semibold text-zinc-400 uppercase tracking-widest px-4 pt-3 pb-2 border-b border-zinc-100">
-                  Contact Details
-                </h2>
-                <div className="divide-y divide-zinc-50">
-                  <div className="flex items-center gap-3 px-4 py-3">
-                    <LuUser size={15} className="text-zinc-400 shrink-0" />
-                    <span className="text-sm text-zinc-700">
-                      {selectedEvent.contactFirstName}{" "}
-                      {selectedEvent.contactLastName}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-3 px-4 py-3">
-                    <LuPhone size={15} className="text-zinc-400 shrink-0" />
-                    <span className="text-sm text-zinc-700">
-                      {selectedEvent.contactPhone}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-3 px-4 py-3">
-                    <LuMail size={15} className="text-zinc-400 shrink-0" />
-                    <span className="text-sm text-zinc-700">
-                      {selectedEvent.contactEmail}
-                    </span>
-                  </div>
-                </div>
+              <div className="shrink-0 bg-white px-5 py-4 border-t border-zinc-100">
+                <Button onClick={handleEventClose} className="w-full">
+                  Close
+                </Button>
               </div>
             </>
           ) : null}
         </div>
-        {mode !== "edit" && (
-          <div className="px-5 pb-5 shrink-0">
-            <Button
-              onClick={handleEventClose}
-              variant="outline"
-              className="w-full text-zinc-600 border-zinc-200 hover:bg-zinc-100"
-            >
-              Close
-            </Button>
-          </div>
-        )}
       </DrawerContent>
     </ShadDrawer>
   );

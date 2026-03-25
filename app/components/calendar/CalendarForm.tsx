@@ -109,9 +109,9 @@ export const CalendarForm = ({ slotInfo }: CalendarFormProps) => {
           e.preventDefault();
           setTimeout(() => form.handleSubmit(handleFormSubmit)(), 0);
         }}
-        className="flex flex-col gap-4 justify-between p-4 h-full pb-16 md:pb-0"
+        className="flex flex-col flex-1 overflow-hidden"
       >
-        <div className={`overflow-y-auto`}>
+        <div className="flex-1 overflow-y-auto p-5 flex flex-col gap-4">
           <FieldGroup>
             <Controller
               name="title"
@@ -319,7 +319,7 @@ export const CalendarForm = ({ slotInfo }: CalendarFormProps) => {
             </div>
           </FieldGroup>
         </div>
-        <div className="bg-white p-4 sticky bottom-0 -mx-4 shadow rounded-b-md">
+        <div className="shrink-0 bg-white px-5 py-4 border-t border-zinc-100">
           <div className="flex justify-between flex-row-reverse">
             <div className="flex gap-2 justify-end">
               {selectedEvent && (
