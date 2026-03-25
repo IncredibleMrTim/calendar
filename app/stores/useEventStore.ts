@@ -9,12 +9,14 @@ import {
 } from "@/actions/events.action";
 import * as z from "zod";
 import { formSchema } from "../components/calendar/CalendarModal";
+import { subHours } from "date-fns";
 
 interface EventStore {
   events: EventDTO[] | null;
-  selectedEvent: EventDTO | null;
+  selectedEvent: EventDTO;
   isCreating: boolean;
   isDeleting: boolean;
+  isEventInPast: boolean;
 
   // Actions
   fetchEvents: () => Promise<void>;
@@ -33,6 +35,7 @@ export const useEventStore = create<EventStore>()(
       selectedEvent: null,
       isCreating: false,
       isDeleting: false,
+      isEventInPast: false,
 
       fetchEvents: async () => {
         const events = await getEvents();
@@ -48,12 +51,20 @@ export const useEventStore = create<EventStore>()(
       },
 
       onSelectEvent: (event: EventDTO) => {
-        set({ selectedEvent: event }, false, "onSelectEvent");
+        const eventPast = event
+          ? event.endDate < subHours(new Date(), 1)
+          : false;
+
+        set(
+          { selectedEvent: event, isEventInPast: eventPast },
+          false,
+          "onSelectEvent",
+        );
       },
 
       handleEventClose: () => {
         set(
-          { selectedEvent: null, isCreating: false, isDeleting: false },
+          { selectedEvent: undefined, isCreating: false, isDeleting: false },
           false,
           "handleEventClose",
         );

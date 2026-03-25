@@ -59,23 +59,25 @@ function InitialValuePlugin({ value }: { value: string }) {
   const isInitialized = useRef(false);
 
   useEffect(() => {
-    if (value && !isInitialized.current) {
-      editor.update(() => {
-        try {
-          const editorState = editor.parseEditorState(value);
-          editor.setEditorState(editorState);
-        } catch {
-          const root = $getRoot();
-          root.clear();
-          const paragraph = $createParagraphNode();
-          const textNode = $createTextNode(value);
-          paragraph.append(textNode);
-          root.append(paragraph);
-          paragraph.selectEnd();
-        }
-      });
-      isInitialized.current = true;
-    }
+    if (isInitialized.current) return;
+    isInitialized.current = true;
+
+    if (!value) return;
+
+    editor.update(() => {
+      try {
+        const editorState = editor.parseEditorState(value);
+        editor.setEditorState(editorState);
+      } catch {
+        const root = $getRoot();
+        root.clear();
+        const paragraph = $createParagraphNode();
+        const textNode = $createTextNode(value);
+        paragraph.append(textNode);
+        root.append(paragraph);
+        paragraph.selectEnd();
+      }
+    });
   }, [editor, value]);
 
   return null;
@@ -290,7 +292,7 @@ export const Rte = ({
   return (
     <LexicalComposer initialConfig={initialConfig}>
       <div
-        className={`border border-gray-300 rounded-md p-2 min-h-32 relative ${
+        className={`border border-gray-300 rounded-md p-2 flex flex-col relative ${
           disabled ? "bg-gray-100 opacity-60" : ""
         }`}
       >
@@ -298,13 +300,13 @@ export const Rte = ({
         <RichTextPlugin
           contentEditable={
             <ContentEditable
-              className="focus:outline-none max-h-128 min-h-128 overflow-y-auto"
+              className="focus:outline-none min-h-40 overflow-y-auto"
               {...props}
             />
           }
           placeholder={
             disabled ? null : (
-              <div className="absolute top-22 md:top-14 left-2 text-gray-400 pointer-events-none">
+              <div className="absolute top-12 left-2 text-gray-400 pointer-events-none">
                 Enter Event Description...
               </div>
             )
