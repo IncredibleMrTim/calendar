@@ -12,16 +12,15 @@ import { enGB } from "date-fns/locale";
 
 import dynamic from "next/dynamic";
 import { EventDTO } from "@/actions/events.action";
-import { CalendarModal } from "./CalendarModal";
 import { useEventStore } from "../../stores/useEventStore";
 import { useCalendarStore, CalendarView } from "@/stores/useCalendarStore";
 import { useDoubleClick } from "@/hooks/useDoubleClick";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { CalendarToolbar } from "./CalendarToolbar";
-import { CalendarDisplayModal } from "./CalendarDisplayModal";
 import { useSession } from "next-auth/react";
 import { UserRole } from "@prisma/client";
 import { AdBanner } from "../adBanner/AdBanner";
+import { Drawer } from "../drawers/Drawer";
 
 const BigCalendar = dynamic(() => Promise.resolve(RBCCalendar), {
   ssr: false,
@@ -75,7 +74,8 @@ export const Calendar = () => {
 
   const handleDoubleClickSlot = useDoubleClick<SlotInfo>({
     onDoubleClick: (slotData) => {
-      setSlotInfo(slotData);
+      if (slotData.end < new Date()) return;
+      setSlotInfo({ ...slotData });
       onCreateEvent();
     },
     threshold: 300,
@@ -152,11 +152,10 @@ export const Calendar = () => {
         />
       </div>
 
-      {session?.user.role === UserRole.ADMIN ? (
-        <CalendarModal slotInfo={slotInfo} />
-      ) : (
-        <CalendarDisplayModal />
-      )}
+      <Drawer
+        slotInfo={slotInfo}
+        mode={session?.user.role === UserRole.ADMIN ? "edit" : "view"}
+      />
     </>
   );
 };

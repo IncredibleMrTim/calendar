@@ -13,18 +13,18 @@ export const CalendarDisplayModal = () => {
     <Dialog open={!!selectedEvent} onOpenChange={handleEventClose}>
       <DialogContent className="max-h-[90vh] md:max-h-2/3 overflow-y-auto">
         <DialogTitle>
-          <div className="text-2xl">{selectedEvent?.title}</div>
+          <div className="text-2xl">{selectedEvent.title}</div>
         </DialogTitle>
 
         <div className="flex flex-col">
           <div className="bg-blue-50 p-4 rounded-md">
             <p>
               <span className="font-bold">Start:</span>{" "}
-              {format(selectedEvent?.startDate, "do MMMM yyy hh:mm")}
+              {format(selectedEvent.startDate, "do MMMM yyy hh:mm")}
             </p>
             <p>
               <span className="font-bold">End:</span>{" "}
-              {format(selectedEvent?.startDate, "do MMMM yyy hh:mm")}
+              {format(selectedEvent.startDate, "do MMMM yyy hh:mm")}
             </p>
           </div>
         </div>
