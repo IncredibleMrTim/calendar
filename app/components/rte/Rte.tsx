@@ -42,6 +42,7 @@ import ImagesPlugin, {
   INSERT_IMAGE_COMMAND,
   compressImage,
 } from "./plugins/ImagesPlugin";
+import { Button } from "../ui/button";
 
 interface RteProps {
   value?: string;
@@ -94,16 +95,15 @@ const ToolbarButton = ({
   children: React.ReactNode;
   title: string;
 }) => (
-  <button
+  <Button
     type="button"
     onClick={onClick}
     title={title}
-    className={`px-3 py-1 text-sm font-medium rounded hover:bg-gray-200 transition-colors ${
-      active ? "bg-gray-300 text-gray-900" : "bg-white text-gray-700"
-    }`}
+    variant="ghost"
+    className={active ? "bg-zinc-200 text-zinc-900" : ""}
   >
     {children}
-  </button>
+  </Button>
 );
 
 function ToolbarPlugin() {
@@ -292,27 +292,29 @@ export const Rte = ({
   return (
     <LexicalComposer initialConfig={initialConfig}>
       <div
-        className={`border border-gray-300 rounded-md p-2 flex flex-col relative ${
+        className={`border border-gray-300 rounded-md p-2 flex flex-col ${
           disabled ? "bg-gray-100 opacity-60" : ""
         }`}
       >
         {!disabled && <ToolbarPlugin />}
-        <RichTextPlugin
-          contentEditable={
-            <ContentEditable
-              className="focus:outline-none min-h-40 overflow-y-auto"
-              {...props}
-            />
-          }
-          placeholder={
-            disabled ? null : (
-              <div className="absolute top-12 left-2 text-gray-400 pointer-events-none">
-                Enter Event Description...
-              </div>
-            )
-          }
-          ErrorBoundary={ErrorBoundary}
-        />
+        <div className="relative flex-1 overflow-y-auto">
+          <RichTextPlugin
+            contentEditable={
+              <ContentEditable
+                className="focus:outline-none min-h-40"
+                {...props}
+              />
+            }
+            placeholder={
+              disabled ? null : (
+                <div className="absolute top-0 left-0 text-gray-400 pointer-events-none">
+                  Enter Event Description...
+                </div>
+              )
+            }
+            ErrorBoundary={ErrorBoundary}
+          />
+        </div>
         <HistoryPlugin />
         <ListPlugin />
         <ImagesPlugin />

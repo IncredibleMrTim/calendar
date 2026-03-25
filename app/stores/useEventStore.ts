@@ -8,7 +8,7 @@ import {
   deleteEvent,
 } from "@/actions/events.action";
 import * as z from "zod";
-import { formSchema } from "../components/calendar/CalendarModal";
+import { formSchema } from "../components/calendar/CalendarForm";
 import { subHours } from "date-fns";
 
 interface EventStore {
