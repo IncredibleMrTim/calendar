@@ -70,15 +70,30 @@ export const MeaChat = () => {
 
       setHistory((prev) => [
         ...prev,
-        { id: entryIdRef.current++, role: ChatRole.USER, result: { type: "message", content: query } },
+        {
+          id: entryIdRef.current++,
+          role: ChatRole.USER,
+          result: { type: "message", content: query },
+        },
         { id: entryIdRef.current++, role: ChatRole.ASSISTANT, result },
       ]);
       setQuery("");
     } catch {
       setHistory((prev) => [
         ...prev,
-        { id: entryIdRef.current++, role: ChatRole.USER, result: { type: "message", content: query } },
-        { id: entryIdRef.current++, role: ChatRole.ASSISTANT, result: { type: "message", content: "Something went wrong. Please try again." } },
+        {
+          id: entryIdRef.current++,
+          role: ChatRole.USER,
+          result: { type: "message", content: query },
+        },
+        {
+          id: entryIdRef.current++,
+          role: ChatRole.ASSISTANT,
+          result: {
+            type: "message",
+            content: "Something went wrong. Please try again.",
+          },
+        },
       ]);
     } finally {
       setLoading(false);
@@ -88,10 +103,10 @@ export const MeaChat = () => {
   return (
     <>
       <div
-        className={`fixed bottom-4 right-4 ${chatHidden ? "flex" : "hidden"} z-10 w-10 h-10 bg-red-200 justify-center items-center rounded-full shadow-md`}
+        className={`fixed bottom-4 right-4 ${chatHidden ? "flex" : "hidden"} z-10 w-12 h-12 bg-red-200 justify-center items-center rounded-full shadow-lg`}
         onClick={() => setChatHidden(false)}
       >
-        <LuMessagesSquare size="20" />
+        <LuMessagesSquare size="25" />
       </div>
       <Card
         className={`${chatHidden ? "hidden" : ""} flex-col fixed md:absolute top-0 md:top-auto left-0 md:left-auto md:bottom-2 md:right-4 w-full md:w-80 h-full md:h-125 z-10 shadow-lg overflow-hidden py-0 rounded-none md:rounded-md`}
