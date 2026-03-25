@@ -12,17 +12,17 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { lexicalToText } from "@/utils/lexical";
 
 const formatTimeString = (date: Date) => format(date, "HH:mm");
-
 const formSchema = z
   .object({
     title: z
       .string()
       .min(5, "Title must be at least 5 characters.")
       .max(32, "Title can only be 32 characters long."),
-    description: z.string().refine(
-      (val) => lexicalToText(val).trim().length > 0,
-      { message: "Description is required." },
-    ),
+    description: z
+      .string()
+      .refine((val) => lexicalToText(val).trim().length > 0, {
+        message: "Description is required.",
+      }),
     startDate: z.date(),
     startTime: z.string().regex(/^\d{2}:\d{2}$/, "Invalid time format (HH:mm)"),
     endDate: z.date(),
