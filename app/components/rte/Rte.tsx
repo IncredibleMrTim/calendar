@@ -292,7 +292,7 @@ export const Rte = ({
   return (
     <LexicalComposer initialConfig={initialConfig}>
       <div
-        className={`border border-gray-300 rounded-md p-2 flex flex-col ${
+        className={`border border-gray-300 rounded-md p-2 flex flex-col text-foreground ${
           disabled ? "bg-gray-100 opacity-60" : ""
         }`}
       >

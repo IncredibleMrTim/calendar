@@ -9,6 +9,7 @@ import { Rte } from "../rte/Rte";
 import { Button } from "../ui/button";
 import { SlotInfo } from "react-big-calendar";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { lexicalToText } from "@/utils/lexical";
 
 const formatTimeString = (date: Date) => format(date, "HH:mm");
 
@@ -18,7 +19,10 @@ const formSchema = z
       .string()
       .min(5, "Title must be at least 5 characters.")
       .max(32, "Title can only be 32 characters long."),
-    description: z.string(),
+    description: z.string().refine(
+      (val) => lexicalToText(val).trim().length > 0,
+      { message: "Description is required." },
+    ),
     startDate: z.date(),
     startTime: z.string().regex(/^\d{2}:\d{2}$/, "Invalid time format (HH:mm)"),
     endDate: z.date(),
@@ -70,7 +74,7 @@ export const CalendarForm = ({ slotInfo }: CalendarFormProps) => {
 
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
-    mode: "onChange",
+    mode: "onTouched",
     defaultValues: selectedEvent
       ? {
           title: selectedEvent.title,
@@ -211,7 +215,7 @@ export const CalendarForm = ({ slotInfo }: CalendarFormProps) => {
               name="description"
               control={form.control}
               render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid} className="relative">
+                <Field data-invalid={fieldState.invalid}>
                   <FieldLabel className="text-muted-foreground text-lg">
                     Description
                   </FieldLabel>
@@ -221,10 +225,7 @@ export const CalendarForm = ({ slotInfo }: CalendarFormProps) => {
                     disabled={isEventInPast}
                   />
                   {fieldState.invalid && (
-                    <FieldError
-                      errors={[fieldState.error]}
-                      className="absolute -bottom-7 right-0 w-auto!"
-                    />
+                    <FieldError errors={[fieldState.error]} />
                   )}
                 </Field>
               )}
@@ -322,7 +323,7 @@ export const CalendarForm = ({ slotInfo }: CalendarFormProps) => {
         <div className="shrink-0 bg-white px-5 py-4 border-t border-zinc-100">
           <div className="flex justify-between flex-row-reverse">
             <div className="flex gap-2 justify-end">
-              {selectedEvent && (
+              {selectedEvent && !isEventInPast && (
                 <>
                   <Button
                     type="button"
@@ -345,10 +346,16 @@ export const CalendarForm = ({ slotInfo }: CalendarFormProps) => {
                 </>
               )}
               {!isDeleting && !isEventInPast && (
-                <Button type="submit">Submit</Button>
+                <Button type="submit" disabled={!form.formState.isValid}>
+                  Submit
+                </Button>
               )}
             </div>
-            <Button onClick={handleEventClose} variant="outline">
+            <Button
+              onClick={handleEventClose}
+              variant={isEventInPast ? "default" : "outline"}
+              className={`${isEventInPast ? "w-full" : ""}`}
+            >
               Close
             </Button>
           </div>
