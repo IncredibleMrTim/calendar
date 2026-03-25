@@ -9,7 +9,6 @@ import { Rte } from "../rte/Rte";
 import { Button } from "../ui/button";
 import { SlotInfo } from "react-big-calendar";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { DialogFooter } from "../ui/dialog";
 
 const formatTimeString = (date: Date) => format(date, "HH:mm");
 
