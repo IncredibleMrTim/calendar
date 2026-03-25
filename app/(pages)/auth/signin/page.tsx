@@ -56,7 +56,9 @@ export default function SignIn() {
               >
                 <div className="flex justify-center gap-4">
                   <GoogleLogo />
-                  {isLoading ? "Signing in..." : "Sign in with Google"}
+                  {isLoading
+                    ? "Signing in..."
+                    : "Sign in or Sign up with Google"}
                 </div>
               </Button>
               <Button
