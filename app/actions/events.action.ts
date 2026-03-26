@@ -14,6 +14,7 @@ export type EventDTO = Pick<
   | "contactLastName"
   | "contactPhone"
   | "contactEmail"
+  | "color"
 >;
 
 export const createEvent = async (eventData: EventDTO): Promise<EventDTO> => {
@@ -25,7 +26,7 @@ export const getEvents = async (): Promise<EventDTO[]> => {
 };
 
 export const updateEvent = async (eventData: EventDTO): Promise<EventDTO> => {
-  const { id, ...data } = eventData;
+  const { id, updatedAt: _, ...data } = eventData;
   return await prisma.event.update({ where: { id }, data });
 };
 

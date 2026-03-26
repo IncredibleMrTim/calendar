@@ -10,6 +10,7 @@ import { Button } from "../ui/button";
 import { SlotInfo } from "react-big-calendar";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { lexicalToText } from "@/utils/lexical";
+import { ColorPicker } from "../colorPicker/ColorPicker";
 
 const formatTimeString = (date: Date) => format(date, "HH:mm");
 const formSchema = z
@@ -33,6 +34,8 @@ const formSchema = z
     contactEmail: z
       .union([z.email("Invalid email address"), z.literal("")])
       .optional(),
+    color: z.string(),
+    id: z.string().optional(),
   })
   .refine(
     (data) => {
@@ -89,6 +92,8 @@ export const CalendarForm = ({ slotInfo }: CalendarFormProps) => {
           contactLastName: selectedEvent.contactLastName ?? "",
           contactPhone: selectedEvent.contactPhone ?? "",
           contactEmail: selectedEvent.contactEmail ?? "",
+          color: selectedEvent.color ?? "#3174ad",
+          id: selectedEvent.id,
         }
       : {
           title: "",
@@ -102,6 +107,7 @@ export const CalendarForm = ({ slotInfo }: CalendarFormProps) => {
           contactLastName: "",
           contactPhone: "",
           contactEmail: "",
+          color: "#3174ad",
         },
   });
 
@@ -117,22 +123,45 @@ export const CalendarForm = ({ slotInfo }: CalendarFormProps) => {
       >
         <div className="flex-1 overflow-y-auto p-5 flex flex-col gap-4">
           <FieldGroup>
-            <Controller
-              name="title"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid} className="">
-                  <FieldLabel>Title</FieldLabel>
-                  <Input {...field} disabled={isEventInPast} />
-                  {fieldState.invalid && (
-                    <FieldError
-                      errors={[fieldState.error]}
-                      className="absolute -bottom-7 right-0 w-auto!"
+            <div className="flex items-end justify-between gap-2 w-full">
+              <Controller
+                name="title"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid} className="">
+                    <FieldLabel>Title</FieldLabel>
+                    <Input {...field} disabled={isEventInPast} />
+                    {fieldState.invalid && (
+                      <FieldError
+                        errors={[fieldState.error]}
+                        className="absolute -bottom-7 right-0 w-auto!"
+                      />
+                    )}
+                  </Field>
+                )}
+              />
+              <Controller
+                name="color"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid} className="w-auto">
+                    <FieldLabel className="hidden">Event Color</FieldLabel>
+                    <ColorPicker
+                      {...field}
+                      value={field.value}
+                      disabled={isEventInPast}
+                      onChange={(e) => field.onChange(e.toHexString())}
                     />
-                  )}
-                </Field>
-              )}
-            />
+                    {fieldState.invalid && (
+                      <FieldError
+                        errors={[fieldState.error]}
+                        className="absolute -bottom-7 right-0 w-auto!"
+                      />
+                    )}
+                  </Field>
+                )}
+              />
+            </div>
             <div className="grid grid-cols-2 gap-4">
               <Controller
                 name="startDate"
@@ -347,7 +376,7 @@ export const CalendarForm = ({ slotInfo }: CalendarFormProps) => {
               )}
               {!isDeleting && !isEventInPast && (
                 <Button type="submit" disabled={!form.formState.isValid}>
-                  Submit
+                  {selectedEvent ? "Update" : "Save"}
                 </Button>
               )}
             </div>
