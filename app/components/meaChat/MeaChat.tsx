@@ -149,8 +149,8 @@ export const MeaChat = () => {
         >
           {history.length === 0 && !loading && (
             <div className="self-start max-w-[80%] bg-muted text-muted-foreground rounded-2xl rounded-tl-sm px-4 py-2 text-sm">
-              Hi! I am MEA, your event assistant. Ask me anything or search for
-              any events in my calendar.
+              Hi! I am MEA, your pageant event assistant. Ask me anything or
+              search for any events in my calendar.
             </div>
           )}
           {history.map((entry) => (
