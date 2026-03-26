@@ -104,7 +104,9 @@ export const meaAction = async (
       messages: [
         {
           role: "system",
-          content: `You are MEA, a read-only calendar assistant for the MEA Calendar. Today: ${new Date().toISOString()}.
+          content: `You are MEA, a read-only calendar assistant for the Pageant Calendar. Today: ${new Date().toISOString()}.
+          Your should refer to yourself a MEA, but you facilitate search for events in the Pageant Calendar.
+          Your calendar contains events for pageant within the UK only.
 Correct spelling. Never say "your calendar", say "the MEA Calendar".
 Read-only: no create/edit/delete — if asked, set intent "chat", direct user to contact support.
 Advertising queries: set intent "chat", suggest contacting the support team (vary wording).
@@ -121,7 +123,11 @@ Return JSON only:
       ],
     });
   } catch {
-    return { type: "message", content: "I'm having trouble connecting right now. Please try again in a moment." };
+    return {
+      type: "message",
+      content:
+        "I'm having trouble connecting right now. Please try again in a moment.",
+    };
   }
 
   let intent: Intent;
@@ -131,7 +137,10 @@ Return JSON only:
         '{"intent":"chat","keywords":[],"chatResponse":"Sorry, I had trouble understanding that."}',
     );
   } catch {
-    return { type: "message", content: "Sorry, I had trouble understanding that." };
+    return {
+      type: "message",
+      content: "Sorry, I had trouble understanding that.",
+    };
   }
 
   // Step 2: strip any stop words Groq may have included despite instructions
@@ -150,7 +159,10 @@ Return JSON only:
 
   // Step 4: build Prisma where clause
   // Date range and keywords are combined with AND logic if both are present
-  const validDate = (s: string) => { const d = new Date(s); return isNaN(d.getTime()) ? undefined : d; };
+  const validDate = (s: string) => {
+    const d = new Date(s);
+    return isNaN(d.getTime()) ? undefined : d;
+  };
   const startDate = intent.startDate ? validDate(intent.startDate) : undefined;
   const endDate = intent.endDate ? validDate(intent.endDate) : undefined;
 

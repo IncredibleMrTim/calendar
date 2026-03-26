@@ -15,8 +15,14 @@ import { EventDTO } from "@/actions/events.action";
 import { Input } from "../ui/input";
 import { format } from "date-fns";
 import { LogoSm } from "../logo/LogoSm";
-import { LuArrowUp, LuChevronDown, LuMessagesSquare } from "react-icons/lu";
+import {
+  LuArrowUp,
+  LuChevronDown,
+  LuMessagesSquare,
+  LuPlus,
+} from "react-icons/lu";
 import { Button } from "../ui/button";
+import Image from "next/image";
 
 interface ChatEntry {
   id: number;
@@ -112,15 +118,26 @@ export const MeaChat = () => {
         className={`${chatHidden ? "hidden" : ""} flex-col fixed md:absolute top-0 md:top-auto left-0 md:left-auto md:bottom-2 md:right-4 w-full md:w-80 h-full md:h-125 z-10 shadow-lg overflow-hidden py-0 rounded-none md:rounded-md`}
       >
         {/* Header */}
-        <div className="flex items-center gap-4 px-4 py-3 border-b bg-secondary text-primary justify-between">
-          <div className="w-10">
-            <LogoSm />
+        <div className="flex items-center gap-4 px-4 py-3 border-b  text-primary justify-between shadow-md">
+          <div className="flex items-center w-full gap-2 p-2">
+            <Image
+              src="/pageant_calendar_full.webp"
+              width={150}
+              height={46}
+              className="h-15 w-auto block"
+              alt="Pageant Calendar"
+            />
+            <div className="flex pt-4 shrink-0 gap-1 items-center">
+              <LuPlus />
+              <div className="shrink-0 w-9">
+                <LogoSm />
+              </div>
+            </div>
           </div>
-          <span className="font-semibold text-sm flex-1">
-            Calendar Event Assistant
-          </span>
-          <div className="w-2 h-2 rounded-full bg-green-400 shrink-0" />
-          <div onClick={() => setChatHidden(true)}>
+          <div
+            onClick={() => setChatHidden(true)}
+            className="flex items-start h-full"
+          >
             <LuChevronDown />
           </div>
         </div>
@@ -128,7 +145,7 @@ export const MeaChat = () => {
         {/* Messages */}
         <CardContent
           ref={messagesRef}
-          className="flex flex-col flex-1 overflow-y-auto gap-3 p-4 min-h-0"
+          className="flex flex-col flex-1 overflow-y-auto gap-3 p-4 pt-0 min-h-0"
         >
           {history.length === 0 && !loading && (
             <div className="self-start max-w-[80%] bg-muted text-muted-foreground rounded-2xl rounded-tl-sm px-4 py-2 text-sm">

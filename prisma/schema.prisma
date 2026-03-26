@@ -35,6 +35,7 @@ model Event {
   contactLastName     String?
   contactPhone        String?
   contactEmail        String?
+  color               String?    @default("#3174ad")
 }
 
 enum UserRole {

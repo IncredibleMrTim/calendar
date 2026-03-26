@@ -74,9 +74,9 @@ export const AuthUserMenu = (props: AuthUserMenuProps) => {
         <Button
           variant="link"
           onClick={() => router.push("/auth/signin")}
-          className="m-0 p-0 h-auto"
+          className="m-0 p-0 h-auto text-gray-500"
         >
-          Login
+          Login / Register
         </Button>
       )}
     </div>
