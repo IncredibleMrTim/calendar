@@ -76,7 +76,10 @@ export const useEventStore = create<EventStore>()(
       },
 
       handleFormSubmit: async (data: z.infer<typeof formSchema>) => {
-        const { selectedEvent, events } = get();
+        const { events } = get();
+        const selectedEvent = data.id
+          ? (get().events || []).find((e) => e.id === data.id) ?? get().selectedEvent
+          : null;
 
         const [startHours, startMinutes] = data.startTime
           .split(":")
@@ -104,6 +107,7 @@ export const useEventStore = create<EventStore>()(
             description: data.description,
             startDate,
             endDate,
+            color: data.color,
             ...contactFields,
           } as EventDTO;
           newEvent = await updateEvent(eventData);
@@ -122,6 +126,7 @@ export const useEventStore = create<EventStore>()(
             description: data.description,
             startDate,
             endDate,
+            color: data.color,
             ...contactFields,
           };
           newEvent = await createEvent(eventData as EventDTO);

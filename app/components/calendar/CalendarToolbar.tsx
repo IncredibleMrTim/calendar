@@ -13,7 +13,9 @@ import { CalendarView } from "@/stores/useCalendarStore";
 import { useCalendarStore } from "@/stores/useCalendarStore";
 import { useSession } from "next-auth/react";
 import { UserRole } from "@prisma/client";
-import { LogoSm } from "../logo/LogoSm";
+import Image from "next/image";
+import { useIsMobile } from "@/hooks/useIsMobile";
+import { LuPlus } from "react-icons/lu";
 
 interface CalendarToolbarProps {
   currentDate: Date;
@@ -30,7 +32,7 @@ const getViewLabel = (view: CalendarView): string => {
     [CalendarView.AGENDA]: "Agenda",
     [CalendarView.WORK_WEEK]: "Work Week",
   };
-  return `View: ${labels[view]}`;
+  return `Viewing: ${labels[view]}`;
 };
 
 export const CalendarToolbar = ({
@@ -41,7 +43,8 @@ export const CalendarToolbar = ({
 }: CalendarToolbarProps) => {
   const currentView = useCalendarStore((state) => state.currentView);
   const { data: session } = useSession();
-  console.log(session);
+  const isMobile = useIsMobile();
+
   const getViewDateFormat = () => {
     switch (currentView) {
       case CalendarView.DAY:
@@ -56,10 +59,16 @@ export const CalendarToolbar = ({
   };
 
   return (
-    <div className="flex flex-col-reverse md:flex-row justify-between items-center p-2  border-b">
-      <div className="flex gap-2 justify-start items-center">
-        <div className="w-30 mx-4 hidden md:flex">
-          <LogoSm />
+    <div className="relative flex flex-col-reverse md:flex-row md:justify-between md:items-end items-center p-2 border-b">
+      <div className="flex gap-2 justify-center items-center md:justify-start md:items-end">
+        <div className="w-60  hidden md:flex p-2">
+          <Image
+            src="/pageant_calendar_full.webp"
+            width={400}
+            height={120}
+            className="w-full h-auto"
+            alt="Pageant Calendar"
+          />
         </div>
         <div className="w-max-150">
           <DatePicker
@@ -76,10 +85,14 @@ export const CalendarToolbar = ({
             onValueChange={onViewChange}
             aria-label="Select calendar view"
           >
-            <SelectTrigger className="w-full max-w-48 border-0 shadow-none ring-0">
-              <SelectValue>{getViewLabel(currentView)}</SelectValue>
+            <SelectTrigger className="w-full max-w-37 border-0 shadow-none ring-0">
+              <SelectValue>
+                <div className="text-gray-500!">
+                  {getViewLabel(currentView)}
+                </div>
+              </SelectValue>
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent position="popper">
               <SelectItem value={CalendarView.DAY}>Day</SelectItem>
               <SelectItem value={CalendarView.WEEK}>Week</SelectItem>
               <SelectItem value={CalendarView.MONTH}>Month</SelectItem>
@@ -89,17 +102,23 @@ export const CalendarToolbar = ({
         </>
       </div>
 
-      <h2 className="flex text-lg font-semibold ">{getViewDateFormat()}</h2>
-      <div className="flex gap-4 flex-nowrap items-center relative w-full md:w-auto">
-        {session?.user.role === UserRole.ADMIN && (
-          <Button
-            className="px-3 py-1 bg-green-500 text-white hidden md:flex"
-            onClick={() => onCreateEvent()}
-          >
-            + Add Event
-          </Button>
-        )}
-        <AuthUserMenu className="absolute top-0 right-0 md:static " />
+      <h2 className="text-lg font-semibold md:absolute md:left-1/2 md:-translate-x-1/2">
+        {getViewDateFormat()}
+      </h2>
+
+      <div className="flex w-full md:w-auto items-center justify-center md:justify-end gap-4">
+        <div className="flex gap-4 items-center">
+          {session?.user.role === UserRole.ADMIN && (
+            <Button
+              variant="outline"
+              className="hidden md:flex"
+              onClick={() => onCreateEvent()}
+            >
+              <LuPlus /> Add Event
+            </Button>
+          )}
+          {!isMobile && <AuthUserMenu />}
+        </div>
       </div>
     </div>
   );

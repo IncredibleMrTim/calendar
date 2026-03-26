@@ -21,6 +21,11 @@ import { useSession } from "next-auth/react";
 import { UserRole } from "@prisma/client";
 import { AdBanner } from "../adBanner/AdBanner";
 import { Drawer } from "../drawers/Drawer";
+import { getContrastColor } from "@/utils/color";
+
+const EventComponent = ({ event }: { event: CalendarEvent }) => (
+  <div>{event.title}</div>
+);
 
 const BigCalendar = dynamic(() => Promise.resolve(RBCCalendar), {
   ssr: false,
@@ -130,7 +135,7 @@ export const Calendar = () => {
         onCreateEvent={onCreateEvent}
       />
       <AdBanner variant="inline" />
-      <div className="w-full h-[calc(100vh-60px)] overflow-auto">
+      <div className="w-full h-[calc(100vh-60px)] overflow-auto bg-gray-50">
         <BigCalendar
           localizer={localizer}
           startAccessor={(event: CalendarEvent) => event.start}
@@ -146,11 +151,22 @@ export const Calendar = () => {
           onView={handleBigCalendarViewChange}
           date={currentDate}
           onNavigate={setCurrentDate}
-          style={{ height: "150vh", minWidth: "800px" }}
+          scrollToTime={new Date()}
+          style={{ height: "100vh", minWidth: "800px" }}
           onSelectEvent={(event: CalendarEvent) => onSelectEvent(event)}
           toolbar={false}
           selectable
           onSelectSlot={handleSelectSlot}
+          components={{ event: EventComponent }}
+          eventPropGetter={(event: CalendarEvent) => ({
+            style: {
+              backgroundColor: event.color ?? "#3174ad",
+
+              color: getContrastColor(event.color ?? "#3174ad"),
+              boxShadow: "2px 2px 5px rgba(0,0,0,0.3)",
+              margin: "1px 0px",
+            },
+          })}
         />
       </div>
 
