@@ -41,15 +41,24 @@ export const authOptions: NextAuthOptions = {
   ],
   secret: process.env.NEXTAUTH_SECRET,
   callbacks: {
-    async signIn({ user, account }) {
+    async signIn({ user, account, profile }) {
       if (!user.email) return false;
 
       if (account?.provider === "google") {
+        const googleProfile = profile as GoogleProfile;
         const dbUser = await prisma.user.findUnique({
           where: { email: user.email },
         });
-        if (!dbUser) return false;
-        if (dbUser.provider !== AuthProvider.GOOGLE) {
+        if (!dbUser) {
+          await prisma.user.create({
+            data: {
+              email: user.email,
+              firstName: googleProfile?.given_name || user.name?.split(" ")[0] || "",
+              surname: googleProfile?.family_name || user.name?.split(" ").slice(1).join(" ") || "",
+              provider: AuthProvider.GOOGLE,
+            },
+          });
+        } else if (dbUser.provider !== AuthProvider.GOOGLE) {
           await prisma.user.update({
             where: { email: user.email },
             data: { provider: AuthProvider.GOOGLE },
