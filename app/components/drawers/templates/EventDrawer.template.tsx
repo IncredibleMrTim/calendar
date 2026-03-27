@@ -13,7 +13,8 @@ import {
   LuX,
 } from "react-icons/lu";
 import { useEventStore } from "@/stores/useEventStore";
-import { DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
+import { DrawerTitle } from "@/components/ui/drawer";
+import { DrawerHeader } from "../DrawerHeader";
 import { useIsMobile } from "@/hooks/useIsMobile";
 
 const drawerInner = cva(
@@ -53,23 +54,20 @@ export const EventDrawerTemplate = ({
           ? "New Event"
           : `${mode === "edit" ? "Edit" : "View"}: ${selectedEvent?.title}`}
       </DrawerTitle>
-      <DrawerHeader className="bg-white border-b border-zinc-100 py-4 flex flex-row items-center gap-2 shrink-0 rounded-t-md">
-        <button
-          onClick={handleEventClose}
-          className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition-colors"
-          aria-label="Close"
-        >
-          <LuX size={18} />
-        </button>
-        <p className="font-medium text-zinc-400 uppercase tracking-widest">
-          {isCreating
+
+      <DrawerHeader
+        onClose={handleEventClose}
+        title={
+          isCreating
             ? "New Event"
-            : `${mode === "edit" ? "Editing: " : ""}${selectedEvent?.title}`}
-        </p>
-      </DrawerHeader>
+            : `${mode === "edit" ? "Editing: " : ""}${selectedEvent?.title}`
+        }
+        className="bg-white border-b border-zinc-100 py-4 flex flex-row items-center gap-2 shrink-0 rounded-t-md"
+      />
+
       {mode === "view" && selectedEvent ? (
         <div className="flex-1 overflow-y-auto p-5 flex flex-col gap-8">
-          {/* Date & Time */}s
+          {/* Date & Time */}
           <div className="flex gap-8">
             <div className="flex flex-col gap-2">
               <p className="text-muted-foreground text-lg font-medium">Start</p>
