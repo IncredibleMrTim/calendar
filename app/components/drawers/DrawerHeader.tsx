@@ -33,7 +33,7 @@ export const DrawerHeader = ({
           </p>
         )}
       </div>
-      <Logos type={LogoType.PAGEANT_SMALL} className="w-8" />
+      <Logos type={LogoType.PAGEANT_SMALL} className="w-8 ml-auto" />
     </ShadDrawerHeader>
   );
 };
