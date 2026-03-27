@@ -119,7 +119,7 @@ export const MeaChat = () => {
       >
         {/* Header */}
         <div className="flex items-center gap-4 px-4 py-3 border-b  text-primary justify-between shadow-md">
-          <div className="flex items-center w-full gap-2 p-2">
+          <div className="flex items-center w-full gap-2 p-2 justify-center">
             <Image
               src="/pageant_calendar_full.webp"
               width={150}
