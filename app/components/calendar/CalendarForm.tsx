@@ -15,10 +15,7 @@ import { ColorPicker } from "../colorPicker/ColorPicker";
 const formatTimeString = (date: Date) => format(date, "HH:mm");
 const formSchema = z
   .object({
-    title: z
-      .string()
-      .min(5, "Title must be at least 5 characters.")
-      .max(32, "Title can only be 32 characters long."),
+    title: z.string().min(5, "Title must be at least 5 characters."),
     description: z
       .string()
       .refine((val) => lexicalToText(val).trim().length > 0, {
