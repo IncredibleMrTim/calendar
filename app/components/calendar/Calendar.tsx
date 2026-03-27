@@ -22,6 +22,7 @@ import { UserRole } from "@prisma/client";
 import { AdBanner } from "../adBanner/AdBanner";
 import { Drawer } from "../drawers/Drawer";
 import { getContrastColor } from "@/utils/color";
+import { EventDrawerTemplate } from "../drawers/templates/EventDrawer.template";
 
 const EventComponent = ({ event }: { event: CalendarEvent }) => (
   <div>{event.title}</div>
@@ -52,6 +53,9 @@ export const Calendar = () => {
   const fetchEvents = useEventStore((state) => state.fetchEvents);
   const onCreateEvent = useEventStore((state) => state.onCreateEvent);
   const onSelectEvent = useEventStore((state) => state.onSelectEvent);
+  const selectedEvent = useEventStore((state) => state.selectedEvent);
+  const isCreating = useEventStore((state) => state.isCreating);
+  const handleEventClose = useEventStore((state) => state.handleEventClose);
 
   useEffect(() => {
     fetchEvents();
@@ -171,9 +175,16 @@ export const Calendar = () => {
       </div>
 
       <Drawer
-        slotInfo={slotInfo}
-        mode={session?.user.role === UserRole.ADMIN ? "edit" : "view"}
-      />
+        open={!!selectedEvent || isCreating}
+        onClose={
+          session?.user.role !== UserRole.ADMIN ? handleEventClose : undefined
+        }
+      >
+        <EventDrawerTemplate
+          slotInfo={slotInfo}
+          mode={session?.user.role === UserRole.ADMIN ? "edit" : "view"}
+        />
+      </Drawer>
     </>
   );
 };
