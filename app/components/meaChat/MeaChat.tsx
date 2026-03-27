@@ -23,6 +23,7 @@ import {
 } from "react-icons/lu";
 import { Button } from "../ui/button";
 import Image from "next/image";
+import { Logos, LogoType } from "../logo/Logos";
 
 interface ChatEntry {
   id: number;
@@ -118,25 +119,20 @@ export const MeaChat = () => {
         className={`${chatHidden ? "hidden" : ""} flex-col fixed md:absolute top-0 md:top-auto left-0 md:left-auto md:bottom-2 md:right-4 w-full md:w-80 h-full md:h-125 z-10 shadow-lg overflow-hidden py-0 rounded-none md:rounded-md`}
       >
         {/* Header */}
-        <div className="flex items-center gap-4 px-4 py-3 border-b  text-primary justify-between shadow-md">
+        <div className="relative flex items-center px-4 py-3 border-b text-primary shadow-md">
           <div className="flex items-center w-full gap-2 p-2 justify-center">
-            <Image
-              src="/pageant_calendar_full.webp"
-              width={150}
-              height={46}
-              className="h-15 w-auto block"
-              alt="Pageant Calendar"
-            />
+            <Logos type={LogoType.PAGEANT_FULL} className="w-4/5" />
+
             <div className="flex pt-4 shrink-0 gap-1 items-center">
               <LuPlus />
               <div className="shrink-0 w-9">
-                <LogoSm />
+                <Logos type={LogoType.MEA_SM} />
               </div>
             </div>
           </div>
           <div
             onClick={() => setChatHidden(true)}
-            className="flex items-start h-full"
+            className="absolute right-0 top-0  p-3"
           >
             <LuChevronDown />
           </div>
