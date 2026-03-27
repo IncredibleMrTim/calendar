@@ -53,6 +53,9 @@ export const Calendar = () => {
   const fetchEvents = useEventStore((state) => state.fetchEvents);
   const onCreateEvent = useEventStore((state) => state.onCreateEvent);
   const onSelectEvent = useEventStore((state) => state.onSelectEvent);
+  const selectedEvent = useEventStore((state) => state.selectedEvent);
+  const isCreating = useEventStore((state) => state.isCreating);
+  const handleEventClose = useEventStore((state) => state.handleEventClose);
 
   useEffect(() => {
     fetchEvents();
@@ -171,7 +174,12 @@ export const Calendar = () => {
         />
       </div>
 
-      <Drawer allowDismiss={session?.user.role !== UserRole.ADMIN}>
+      <Drawer
+        open={!!selectedEvent || isCreating}
+        onClose={
+          session?.user.role !== UserRole.ADMIN ? handleEventClose : undefined
+        }
+      >
         <EventDrawerTemplate
           slotInfo={slotInfo}
           mode={session?.user.role === UserRole.ADMIN ? "edit" : "view"}

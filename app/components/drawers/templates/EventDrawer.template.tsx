@@ -69,7 +69,7 @@ export const EventDrawerTemplate = ({
       </DrawerHeader>
       {mode === "view" && selectedEvent ? (
         <div className="flex-1 overflow-y-auto p-5 flex flex-col gap-8">
-          {/* Date & Time */}
+          {/* Date & Time */}s
           <div className="flex gap-8">
             <div className="flex flex-col gap-2">
               <p className="text-muted-foreground text-lg font-medium">Start</p>
@@ -98,7 +98,6 @@ export const EventDrawerTemplate = ({
               </div>
             </div>
           </div>
-
           {/* Description */}
           <div className="flex flex-col gap-2">
             <p className="text-muted-foreground text-lg font-medium">
@@ -111,7 +110,6 @@ export const EventDrawerTemplate = ({
               }}
             />
           </div>
-
           {/* Contact Details */}
           <div className="flex flex-col gap-2">
             <p className="text-muted-foreground text-lg font-medium">

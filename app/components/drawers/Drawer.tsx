@@ -1,10 +1,6 @@
 "use client";
 import { cva } from "class-variance-authority";
-import {
-  Drawer as ShadDrawer,
-  DrawerContent,
-} from "@/components/ui/drawer";
-import { useEventStore } from "@/stores/useEventStore";
+import { Drawer as ShadDrawer, DrawerContent } from "@/components/ui/drawer";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { ReactNode } from "react";
 
@@ -18,31 +14,25 @@ const drawerContent = cva("bg-transparent border-none shadow-none", {
 });
 
 interface DrawerProps {
-  allowDismiss?: boolean;
+  open: boolean;
+  onClose?: () => void;
   children: ReactNode;
 }
 
-export const Drawer = ({ children, allowDismiss = true }: DrawerProps) => {
-  const selectedEvent = useEventStore((state) => state.selectedEvent);
-  const isCreating = useEventStore((state) => state.isCreating);
-  const handleEventClose = useEventStore((state) => state.handleEventClose);
-
+export const Drawer = ({ open, onClose, children }: DrawerProps) => {
   const isMobile = useIsMobile();
-  const isOpen = !!selectedEvent || isCreating;
 
   return (
     <ShadDrawer
-      open={isOpen}
+      open={open}
       direction={isMobile ? "bottom" : "right"}
-      onClose={allowDismiss ? handleEventClose : undefined}
+      onClose={onClose}
       shouldScaleBackground={false}
       dismissible={false}
     >
       <DrawerContent
         className={drawerContent({ device: isMobile ? "mobile" : "desktop" })}
-        onOverlayClick={
-          !isMobile && allowDismiss ? handleEventClose : undefined
-        }
+        onOverlayClick={onClose}
       >
         {children}
       </DrawerContent>

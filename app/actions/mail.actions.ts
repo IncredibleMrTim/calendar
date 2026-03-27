@@ -2,17 +2,15 @@
 
 import nodemailer from "nodemailer";
 
-interface EmailUser {
+interface SendMailProps {
   email: string;
+  subject: string;
+  html: string;
 }
 
-export const sendEmail = async (
-  user: EmailUser,
-  subject: string,
-  html: string,
-) => {
-  if (!user.email || !subject || !html) {
-    throw new Error("Missing required fields: user.email, subject, html");
+export const sendEmail = async ({ email, subject, html }: SendMailProps) => {
+  if (!email || !subject || !html) {
+    throw new Error("Missing required fields: email, subject, message");
   }
 
   if (!process.env.SMTP_EMAIL || !process.env.SMTP_PASSWORD) {
@@ -24,7 +22,6 @@ export const sendEmail = async (
     port: parseInt(process.env.SMTP_PORT || "587"),
     secure: process.env.SMTP_SECURE === "true",
     auth: {
-      type: "OAUTH2",
       user: process.env.SMTP_EMAIL,
       pass: process.env.SMTP_PASSWORD,
     },
@@ -33,7 +30,7 @@ export const sendEmail = async (
   const info = await transporter.sendMail({
     from: process.env.SMTP_EMAIL,
     to: process.env.SMTP_EMAIL,
-    replyTo: user.email,
+    replyTo: email,
     subject,
     html,
   });

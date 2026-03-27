@@ -12,6 +12,7 @@ import {
   ManualAuthAction,
 } from "@/components/auth/manualAuth/ManualAuth";
 import { GoogleLogo } from "@/components/logo/GoogleLogo";
+import { Logos, LogoType } from "@/components/logo/Logos";
 
 export default function SignIn() {
   const router = useRouter();
@@ -40,14 +41,7 @@ export default function SignIn() {
         <div className="flex flex-col gap-4 max-w-md w-full ">
           <div className="flex flex-col justify-center w-full gap-16">
             <div className="w-[80vw] md:w-auto mx-auto">
-              {/* <Logo /> */}
-              <Image
-                src="/pageant_calendar_full_lg.webp"
-                width={400}
-                height={120}
-                className="w-full h-auto"
-                alt="Pageant Calendar"
-              />
+              <Logos type={LogoType.PAGEANT_FULL_LG} />
             </div>
             <ManualAuth
               action={manualAuthAction}
@@ -63,7 +57,7 @@ export default function SignIn() {
                 className="w-full flex"
               >
                 <div className="flex justify-center gap-4">
-                  <GoogleLogo />
+                  <Logos type={LogoType.GOOGLE} />
                   {isLoading
                     ? "Signing in..."
                     : "Sign in or Sign up with Google"}
