@@ -5,7 +5,7 @@ import { MeaChat } from "./components/meaChat/MeaChat";
 import { Logos, LogoType } from "./components/logo/Logos";
 import { useEventStore } from "./stores/useEventStore";
 import { EventDTO } from "./actions/events.action";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { EventDrawerTemplate } from "./components/drawer/templates/EventDrawer.template";
 import { Drawer } from "./components/drawer/Drawer";
 import { UserRole } from "@prisma/client";
@@ -18,6 +18,7 @@ import { CalendarView, useCalendarStore } from "./stores/useCalendarStore";
 import { View } from "react-big-calendar";
 
 export default function Home() {
+  /* Event State */
   const fetchEvents = useEventStore((state) => state.fetchEvents);
   const setSelectedEvent = useEventStore((state) => state.setSelectedEvent);
   const setSelectedSlot = useEventStore((state) => state.setSelectedSlot);
@@ -34,6 +35,7 @@ export default function Home() {
   const rawEvents = useEventStore((state) => state.events);
   const events = rawEvents ?? [];
 
+  /* Calendar State */
   const setCurrentDate = useCalendarStore((state) => state.setCurrentDate);
   const setCurrentView = useCalendarStore((state) => state.setCurrentView);
   const currentDate = useCalendarStore((state) => state.currentDate);
@@ -42,6 +44,7 @@ export default function Home() {
   const isMobile = useIsMobile();
   const { data: session } = useSession();
 
+  /* Fetch all events on load */
   useEffect(() => {
     fetchEvents();
   }, [fetchEvents]);
@@ -68,7 +71,6 @@ export default function Home() {
 
   const handleClose = () => {
     handleEventClose();
-    setSlotInfo(undefined);
   };
 
   const handleBigCalendarViewChange = (view: View) => {
