@@ -1,5 +1,5 @@
 "use client";
-import { CalendarForm } from "@/components/calendar/CalendarForm";
+import { CalendarForm, FormSchema } from "@/components/calendar/CalendarForm";
 import { lexicalToHtml } from "@/utils/lexical";
 import { format } from "date-fns";
 import { SlotInfo } from "react-big-calendar";
@@ -10,12 +10,11 @@ import {
   LuUser,
   LuPhone,
   LuMail,
-  LuX,
 } from "react-icons/lu";
-import { useEventStore } from "@/stores/useEventStore";
 import { DrawerTitle } from "@/components/ui/drawer";
 import { DrawerHeader } from "../DrawerHeader";
 import { useIsMobile } from "@/hooks/useIsMobile";
+import { EventDTO } from "@/actions/events.action";
 
 const drawerInner = cva(
   "flex flex-col h-full bg-zinc-50 transition-[transform,opacity] duration-300 ease-in-out " +
@@ -35,16 +34,28 @@ const drawerInner = cva(
 interface EventDrawerTemplateProps {
   mode?: "view" | "edit";
   slotInfo?: SlotInfo;
+  selectedEvent?: EventDTO | null;
+  isCreating: boolean;
+  isDeleting: boolean;
+  isEventInPast: boolean;
+  onClose: () => void;
+  onSubmit: (data: FormSchema) => Promise<void>;
+  onDelete: () => Promise<void>;
+  onSetDeleting: (value: boolean) => void;
 }
 
 export const EventDrawerTemplate = ({
   mode = "view",
   slotInfo,
+  selectedEvent,
+  isCreating,
+  isDeleting,
+  isEventInPast,
+  onClose,
+  onSubmit,
+  onDelete,
+  onSetDeleting,
 }: EventDrawerTemplateProps) => {
-  const selectedEvent = useEventStore((state) => state.selectedEvent);
-  const isCreating = useEventStore((state) => state.isCreating);
-  const handleEventClose = useEventStore((state) => state.handleEventClose);
-
   const isMobile = useIsMobile();
 
   return (
@@ -56,7 +67,7 @@ export const EventDrawerTemplate = ({
       </DrawerTitle>
 
       <DrawerHeader
-        onClose={handleEventClose}
+        onClose={onClose}
         title={
           isCreating
             ? "New Event"
@@ -67,7 +78,6 @@ export const EventDrawerTemplate = ({
 
       {mode === "view" && selectedEvent ? (
         <div className="flex-1 overflow-y-auto p-5 flex flex-col gap-8">
-          {/* Date & Time */}
           <div className="flex gap-8">
             <div className="flex flex-col gap-2">
               <p className="text-muted-foreground text-lg font-medium">Start</p>
@@ -96,7 +106,6 @@ export const EventDrawerTemplate = ({
               </div>
             </div>
           </div>
-          {/* Description */}
           <div className="flex flex-col gap-2">
             <p className="text-muted-foreground text-lg font-medium">
               Description
@@ -108,7 +117,6 @@ export const EventDrawerTemplate = ({
               }}
             />
           </div>
-          {/* Contact Details */}
           <div className="flex flex-col gap-2">
             <p className="text-muted-foreground text-lg font-medium">
               Contact Details
@@ -137,7 +145,16 @@ export const EventDrawerTemplate = ({
           </div>
         </div>
       ) : (
-        <CalendarForm slotInfo={slotInfo} />
+        <CalendarForm
+          slotInfo={slotInfo}
+          selectedEvent={selectedEvent}
+          isDeleting={isDeleting}
+          isEventInPast={isEventInPast}
+          onClose={onClose}
+          onSubmit={onSubmit}
+          onDelete={onDelete}
+          onSetDeleting={onSetDeleting}
+        />
       )}
     </div>
   );
