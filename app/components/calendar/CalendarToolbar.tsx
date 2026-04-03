@@ -11,20 +11,20 @@ import {
   SelectValue,
 } from "../ui/select";
 import { CalendarView } from "@/stores/useCalendarStore";
-import { useCalendarStore } from "@/stores/useCalendarStore";
-import { useSession } from "next-auth/react";
-import { UserRole } from "@prisma/client";
-import Image from "next/image";
 import { LuPlus } from "react-icons/lu";
-import { Drawer } from "../drawers/Drawer";
-import { ContactFormTemplate } from "../drawers/templates/ContactForm.template";
+import { Drawer } from "../drawer/Drawer";
+import { ContactFormTemplate } from "../drawer/templates/ContactForm.template";
 import { Logos, LogoType } from "../logo/Logos";
+import { SlotInfo } from "react-big-calendar";
 
 interface CalendarToolbarProps {
   currentDate: Date;
-  onNavigate: (action?: "PREV" | "NEXT" | "TODAY", selectedDate?: Date) => void;
+  currentView: CalendarView;
+  canEdit?: boolean;
+  user?: { firstName?: string; lastName?: string; email?: string };
+  onNavigate: (newDate: Date) => void;
   onViewChange: (view: CalendarView) => void;
-  onCreateEvent: () => void;
+  onCreateEvent: (data?: SlotInfo) => void;
 }
 
 const getViewLabel = (view: CalendarView): string => {
@@ -40,12 +40,13 @@ const getViewLabel = (view: CalendarView): string => {
 
 export const CalendarToolbar = ({
   currentDate,
+  currentView,
+  canEdit,
+  user,
   onNavigate,
   onViewChange,
   onCreateEvent,
 }: CalendarToolbarProps) => {
-  const currentView = useCalendarStore((state) => state.currentView);
-  const { data: session } = useSession();
   const [showContactDrawer, setShowContactDrawer] = useState(false);
 
   const handleMenuItemClick = (item: MenuItemType) => {
@@ -79,7 +80,7 @@ export const CalendarToolbar = ({
               aria-label="Select calendar date"
               placeholder={format(currentDate, "MMMM")}
               onSelect={(selected: Date | undefined) =>
-                onNavigate(undefined, selected)
+                selected && onNavigate(selected)
               }
             />
           </div>
@@ -112,7 +113,7 @@ export const CalendarToolbar = ({
 
         <div className="flex w-full md:w-auto items-center justify-center md:justify-end gap-4 ">
           <div className="flex gap-4 items-center">
-            {session?.user.role === UserRole.ADMIN && (
+            {canEdit && (
               <Button
                 variant="outline"
                 className="hidden md:flex"
@@ -132,7 +133,7 @@ export const CalendarToolbar = ({
         open={showContactDrawer}
         onClose={() => setShowContactDrawer(false)}
       >
-        <ContactFormTemplate onClose={() => setShowContactDrawer(false)} />
+        <ContactFormTemplate user={user} onClose={() => setShowContactDrawer(false)} />
       </Drawer>
     </>
   );

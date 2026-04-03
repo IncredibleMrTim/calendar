@@ -1,4 +1,3 @@
-import { useEventStore } from "@/stores/useEventStore";
 import { addMinutes, format } from "date-fns";
 import z from "zod";
 import { Field, FieldError, FieldGroup, FieldLabel } from "../ui/field";
@@ -11,69 +10,81 @@ import { SlotInfo } from "react-big-calendar";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { lexicalToText } from "@/utils/lexical";
 import { ColorPicker } from "../colorPicker/ColorPicker";
+import { EventDTO } from "@/actions/events.action";
 
 const formatTimeString = (date: Date) => format(date, "HH:mm");
-const formSchema = z
-  .object({
-    title: z.string().min(5, "Title must be at least 5 characters."),
-    description: z
-      .string()
-      .refine((val) => lexicalToText(val).trim().length > 0, {
-        message: "Description is required.",
-      }),
-    startDate: z.date(),
-    startTime: z.string().regex(/^\d{2}:\d{2}$/, "Invalid time format (HH:mm)"),
-    endDate: z.date(),
-    endTime: z.string().regex(/^\d{2}:\d{2}$/, "Invalid time format (HH:mm)"),
-    contactFirstName: z.string().optional(),
-    contactLastName: z.string().optional(),
-    contactPhone: z.string().optional(),
-    contactEmail: z
-      .union([z.email("Invalid email address"), z.literal("")])
-      .optional(),
-    color: z.string(),
-    id: z.string().optional(),
-  })
-  .refine(
-    (data) => {
-      const state = useEventStore.getState();
-      const isEditing = !!state.selectedEvent;
-      if (isEditing) return true;
-      const startDateTime = new Date(data.startDate);
-      const [hours, minutes] = data.startTime.split(":").map(Number);
-      startDateTime.setHours(hours, minutes, 0, 0);
-      const now = new Date();
-      return startDateTime >= new Date(now.getTime() - 300000);
-    },
-    {
-      message: "Start date and time cannot be in the past.",
-      path: ["startDate"],
-    },
-  );
 
-export type FormSchema = z.infer<typeof formSchema>;
-export { formSchema };
+export const createFormSchema = (isEditing: boolean) =>
+  z
+    .object({
+      title: z.string().min(5, "Title must be at least 5 characters."),
+      description: z
+        .string()
+        .refine((val) => lexicalToText(val).trim().length > 0, {
+          message: "Description is required.",
+        }),
+      startDate: z.date(),
+      startTime: z
+        .string()
+        .regex(/^\d{2}:\d{2}$/, "Invalid time format (HH:mm)"),
+      endDate: z.date(),
+      endTime: z
+        .string()
+        .regex(/^\d{2}:\d{2}$/, "Invalid time format (HH:mm)"),
+      contactFirstName: z.string().optional(),
+      contactLastName: z.string().optional(),
+      contactPhone: z.string().optional(),
+      contactEmail: z
+        .union([z.email("Invalid email address"), z.literal("")])
+        .optional(),
+      color: z.string(),
+      id: z.string().optional(),
+    })
+    .refine(
+      (data) => {
+        if (isEditing) return true;
+        const startDateTime = new Date(data.startDate);
+        const [hours, minutes] = data.startTime.split(":").map(Number);
+        startDateTime.setHours(hours, minutes, 0, 0);
+        const now = new Date();
+        return startDateTime >= new Date(now.getTime() - 300000);
+      },
+      {
+        message: "Start date and time cannot be in the past.",
+        path: ["startDate"],
+      },
+    );
+
+export type FormSchema = z.infer<ReturnType<typeof createFormSchema>>;
 
 interface CalendarFormProps {
   slotInfo?: SlotInfo;
+  selectedEvent?: EventDTO | null;
+  isDeleting: boolean;
+  isEventInPast: boolean;
+  onClose: () => void;
+  onSubmit: (data: FormSchema) => Promise<void>;
+  onDelete: () => Promise<void>;
+  onSetDeleting: (value: boolean) => void;
 }
 
-export const CalendarForm = ({ slotInfo }: CalendarFormProps) => {
-  const selectedEvent = useEventStore((state) => state.selectedEvent);
-  const isDeleting = useEventStore((state) => state.isDeleting);
-  const isEventInPast = useEventStore((state) => state.isEventInPast);
-  const setIsDeleting = useEventStore((state) => state.setIsDeleting);
-  const handleEventClose = useEventStore((state) => state.handleEventClose);
-  const handleFormSubmit = useEventStore((state) => state.handleFormSubmit);
-  const handleDelete = useEventStore((state) => state.handleDelete);
-
+export const CalendarForm = ({
+  slotInfo,
+  selectedEvent,
+  isDeleting,
+  isEventInPast,
+  onClose,
+  onSubmit,
+  onDelete,
+  onSetDeleting,
+}: CalendarFormProps) => {
   const now = new Date();
   const currentTime = formatTimeString(now);
   const endDateDefault = addMinutes(now, 60);
   const endTimeString = formatTimeString(endDateDefault);
 
   const form = useForm<FormSchema>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(createFormSchema(!!selectedEvent)),
     mode: "onTouched",
     defaultValues: selectedEvent
       ? {
@@ -114,7 +125,7 @@ export const CalendarForm = ({ slotInfo }: CalendarFormProps) => {
         id="create-event-form"
         onSubmit={(e) => {
           e.preventDefault();
-          setTimeout(() => form.handleSubmit(handleFormSubmit)(), 0);
+          setTimeout(() => form.handleSubmit(onSubmit)(), 0);
         }}
         className="flex flex-col flex-1 overflow-hidden"
       >
@@ -355,7 +366,7 @@ export const CalendarForm = ({ slotInfo }: CalendarFormProps) => {
                     type="button"
                     variant="destructive"
                     onClick={() =>
-                      !isDeleting ? setIsDeleting(true) : handleDelete()
+                      !isDeleting ? onSetDeleting(true) : onDelete()
                     }
                   >
                     {!isDeleting ? "Delete Event" : "Confirm Delete!"}
@@ -364,7 +375,7 @@ export const CalendarForm = ({ slotInfo }: CalendarFormProps) => {
                     <Button
                       type="button"
                       variant="secondary"
-                      onClick={() => setIsDeleting(false)}
+                      onClick={() => onSetDeleting(false)}
                     >
                       Cancel
                     </Button>
@@ -378,7 +389,8 @@ export const CalendarForm = ({ slotInfo }: CalendarFormProps) => {
               )}
             </div>
             <Button
-              onClick={handleEventClose}
+              onClick={onClose}
+              type="button"
               variant={isEventInPast ? "default" : "outline"}
               className={`${isEventInPast ? "w-full" : ""}`}
             >

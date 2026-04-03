@@ -14,7 +14,6 @@ import { useEventStore } from "@/stores/useEventStore";
 import { EventDTO } from "@/actions/events.action";
 import { Input } from "../ui/input";
 import { format } from "date-fns";
-import { LogoSm } from "../logo/LogoSm";
 import {
   LuArrowUp,
   LuChevronDown,
@@ -22,7 +21,6 @@ import {
   LuPlus,
 } from "react-icons/lu";
 import { Button } from "../ui/button";
-import Image from "next/image";
 import { Logos, LogoType } from "../logo/Logos";
 
 interface ChatEntry {
@@ -33,7 +31,7 @@ interface ChatEntry {
 
 export const MeaChat = () => {
   const setCurrentDate = useCalendarStore((state) => state.setCurrentDate);
-  const onSelectEvent = useEventStore((state) => state.onSelectEvent);
+  const setSelectedEvent = useEventStore((state) => state.setSelectedEvent);
   const [query, setQuery] = useState("");
   const [history, setHistory] = useState<ChatEntry[]>([]);
   const [summary, setSummary] = useState<string | undefined>(undefined);
@@ -176,7 +174,7 @@ export const MeaChat = () => {
                         className="font-semibold cursor-pointer hover:underline"
                         onClick={() => {
                           setCurrentDate(new Date(event.startDate));
-                          onSelectEvent(event as EventDTO);
+                          setSelectedEvent(event as EventDTO);
                           setChatHidden(true);
                         }}
                       >
