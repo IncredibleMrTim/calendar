@@ -6,7 +6,6 @@ import { useIsMobile } from "@/hooks/useIsMobile";
 import z from "zod";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useSession } from "next-auth/react";
 import { sendEmail } from "@/actions/mail.actions";
 import {
   Field,
@@ -38,6 +37,7 @@ const drawerInner = cva(
 
 interface ContactFormTemplateProps {
   onClose?: () => void;
+  user?: { firstName?: string; lastName?: string; email?: string };
 }
 
 const formSchema = z.object({
@@ -51,20 +51,18 @@ const formSchema = z.object({
   message: z.string().nonempty("Enter a message"),
 });
 
-export const ContactFormTemplate = ({ onClose }: ContactFormTemplateProps) => {
+export const ContactFormTemplate = ({ onClose, user }: ContactFormTemplateProps) => {
   const isMobile = useIsMobile();
   const [emailSuccess, setEmailSuccess] = useState<{
     success: boolean;
     message: string;
   } | null>(null);
-  const { data: session } = useSession();
-  const { user } = session ?? {};
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     mode: "onTouched",
     defaultValues: {
-      firstName: user?.name ?? "",
+      firstName: user?.firstName ?? "",
       lastName: user?.lastName ?? "",
       email: user?.email ?? "",
       subject: "",

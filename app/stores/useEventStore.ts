@@ -7,24 +7,31 @@ import {
   updateEvent,
   deleteEvent,
 } from "@/actions/events.action";
-import * as z from "zod";
-import { formSchema } from "../components/calendar/CalendarForm";
+import { infer as zInfer } from "zod";
+import { createFormSchema } from "../components/calendar/CalendarForm";
 import { subHours } from "date-fns";
+import { SlotInfo } from "react-big-calendar";
 
 interface EventStore {
   events: EventDTO[] | null;
   selectedEvent: EventDTO;
+  selectedSlot: SlotInfo;
   isCreating: boolean;
   isDeleting: boolean;
   isEventInPast: boolean;
+  isSlotInPast: boolean;
 
   // Actions
   fetchEvents: () => Promise<void>;
   setIsDeleting: (value: boolean) => void;
-  onCreateEvent: () => void;
-  onSelectEvent: (event: EventDTO) => void;
+  setIsCreating: (value: boolean) => void;
+
+  setSelectedEvent: (event: EventDTO) => void;
+  setSelectedSlot: (slot: SlotInfo) => void;
   handleEventClose: () => void;
-  handleFormSubmit: (data: z.infer<typeof formSchema>) => Promise<void>;
+  handleFormSubmit: (
+    data: zInfer<ReturnType<typeof createFormSchema>>,
+  ) => Promise<void>;
   handleDelete: () => Promise<void>;
 }
 
@@ -33,9 +40,11 @@ export const useEventStore = create<EventStore>()(
     (set, get) => ({
       events: null,
       selectedEvent: null,
+      selectedSlot: null,
       isCreating: false,
       isDeleting: false,
       isEventInPast: false,
+      isSlotInPast: false,
 
       fetchEvents: async () => {
         const events = await getEvents();
@@ -46,11 +55,21 @@ export const useEventStore = create<EventStore>()(
         set({ isDeleting: value }, false, "setIsDeleting");
       },
 
-      onCreateEvent: () => {
-        set({ isCreating: true }, false, "onCreateEvent");
+      setIsCreating: (value: boolean) => {
+        set({ isCreating: value }, false, "setIsCreating");
       },
 
-      onSelectEvent: (event: EventDTO) => {
+      setSelectedSlot: (slot: SlotInfo) => {
+        const isPast = slot ? slot.end < subHours(new Date(), 1) : false;
+
+        set(
+          { selectedSlot: slot, isSlotInPast: isPast },
+          false,
+          "setSelectedSlot",
+        );
+      },
+
+      setSelectedEvent: (event: EventDTO) => {
         const eventPast = event
           ? event.endDate < subHours(new Date(), 1)
           : false;
@@ -58,7 +77,7 @@ export const useEventStore = create<EventStore>()(
         set(
           { selectedEvent: event, isEventInPast: eventPast },
           false,
-          "onSelectEvent",
+          "setSelectedEvent",
         );
       },
 
@@ -66,19 +85,24 @@ export const useEventStore = create<EventStore>()(
         set(
           {
             selectedEvent: undefined,
+            selectedSlot: undefined,
             isCreating: false,
             isDeleting: false,
             isEventInPast: false,
+            isSlotInPast: false,
           },
           false,
           "handleEventClose",
         );
       },
 
-      handleFormSubmit: async (data: z.infer<typeof formSchema>) => {
+      handleFormSubmit: async (
+        data: zInfer<ReturnType<typeof createFormSchema>>,
+      ) => {
         const { events } = get();
         const selectedEvent = data.id
-          ? (get().events || []).find((e) => e.id === data.id) ?? get().selectedEvent
+          ? ((get().events || []).find((e) => e.id === data.id) ??
+            get().selectedEvent)
           : null;
 
         const [startHours, startMinutes] = data.startTime
@@ -129,6 +153,7 @@ export const useEventStore = create<EventStore>()(
             color: data.color,
             ...contactFields,
           };
+
           newEvent = await createEvent(eventData as EventDTO);
           set({ events: [...(events || []), newEvent] }, false, "createEvent");
         }
