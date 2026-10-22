@@ -110,7 +110,7 @@ export const meaAction = async (
 Correct spelling. Never say "your calendar", say "the MEA Calendar".
 Read-only: no create/edit/delete — if asked, set intent "chat", direct user to contact support.
 Advertising queries: set intent "chat", suggest contacting the support team (vary wording).
-Date range >12 months: set intent "chat", ask user to refine search.${summary ? `\nConversation so far: ${summary}` : ""}
+${summary ? `\nConversation so far: ${summary}` : ""}
 Return JSON only:
 - "intent": "search"|"chat"
 - "keywords": proper nouns only — specific event titles or contact names. NEVER include: find, show, get, list, all, events, calendar, any, me, in, on, at, or any month/year/date word. Empty array for date-only queries like "events in march".
@@ -122,7 +122,8 @@ Return JSON only:
         { role: ChatRole.USER, content: query },
       ],
     });
-  } catch {
+  } catch (error) {
+    console.error("MEA Groq call failed:", error);
     return {
       type: "message",
       content:
@@ -188,7 +189,11 @@ Return JSON only:
       : {}),
   };
 
-  const events = await prisma.event.findMany({ where, take: 20 });
+  const events = await prisma.event.findMany({
+    where,
+    orderBy: { startDate: "asc" },
+    take: 20,
+  });
 
   // Step 5: return results or a not-found message
   if (events.length === 0) {
